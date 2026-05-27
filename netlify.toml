@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+  ignore = "exit 0"
+
+[[redirects]]
+  from = "/*"
+  to = "/olfactory_scorecards_template.html"
+  status = 200
