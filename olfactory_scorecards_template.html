@@ -1,695 +1,439 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olfactory NYC — Store Scorecards 2026</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #F1F5F9; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    button { font-family: inherit; }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #F1F5F9; }
-    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
-    table { border-collapse: collapse; }
-    @media (max-width: 768px) {
-      .store-layout { grid-template-columns: 1fr !important; }
-      .store-sidebar { display: flex !important; flex-direction: row !important; overflow-x: auto; }
-      .store-sidebar button { min-width: 140px; flex-shrink: 0; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Olfactory NYC — Store Scorecard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0d0c; --surface: #1a1815; --surface2: #242220; --border: #2e2b28;
+    --accent: #c9a96e; --text: #e8e4dc; --muted: #7a7268;
+    --green: #4a9e6a; --amber: #d4a843; --red: #c05f4a;
+    --font-d: "Georgia", serif; --font-b: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --font-m: "Courier New", monospace;
+  }
+  body { background:var(--bg); color:var(--text); font-family:var(--font-b); font-size:13px; line-height:1.5; min-height:100vh; }
+  #auth-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:1000; }
+  .auth-box { text-align:center; padding:40px; border:1px solid var(--border); background:var(--surface); width:320px; }
+  .auth-box h2 { font-family:var(--font-d); font-size:22px; color:var(--accent); margin-bottom:8px; }
+  .auth-box p { color:var(--muted); font-size:12px; margin-bottom:24px; letter-spacing:.05em; text-transform:uppercase; }
+  .auth-box input { width:100%; padding:10px 14px; background:var(--bg); border:1px solid var(--border); color:var(--text); font-family:var(--font-m); font-size:13px; margin-bottom:12px; outline:none; }
+  .auth-box input:focus { border-color:var(--accent); }
+  .auth-box button { width:100%; padding:10px; background:var(--accent); color:#0e0d0c; border:none; cursor:pointer; font-size:12px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; }
+  .auth-box button:hover { background:#d4b47a; }
+  #auth-error { color:var(--red); font-size:11px; margin-top:8px; display:none; }
+  #app { display:none; }
+  header { padding:16px 32px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .logo { font-family:var(--font-d); font-size:20px; color:var(--accent); }
+  .logo span { color:var(--muted); font-size:11px; font-family:var(--font-b); margin-left:12px; text-transform:uppercase; letter-spacing:.1em; }
+  .badge { background:var(--surface2); border:1px solid var(--border); padding:4px 12px; font-size:11px; color:var(--muted); letter-spacing:.04em; }
+  .badge .live { color:var(--green); }
+  .nav-tabs { display:flex; border-bottom:1px solid var(--border); padding:0 32px; }
+  .tab-btn { padding:12px 20px; background:none; border:none; color:var(--muted); cursor:pointer; font-size:12px; letter-spacing:.08em; text-transform:uppercase; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .tab-btn:hover:not(.active) { color:var(--text); }
+  main { padding:32px; }
+  .view { display:none; }
+  .view.active { display:block; }
+  .view-hdr { display:flex; align-items:baseline; gap:16px; margin-bottom:24px; }
+  .view-hdr h2 { font-family:var(--font-d); font-size:24px; }
+  .view-hdr p { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
+  /* DELTA */
+  .up   { color:var(--green); font-size:11px; margin-left:4px; }
+  .dn   { color:var(--red);   font-size:11px; margin-left:4px; }
+  .flat { color:var(--muted); font-size:11px; margin-left:4px; }
+  .rup  { color:var(--green); font-size:10px; font-family:var(--font-m); margin-left:3px; }
+  .rdn  { color:var(--red);   font-size:10px; font-family:var(--font-m); margin-left:3px; }
+  /* LEADERBOARD */
+  .lb-wrap { overflow-x:auto; }
+  .lb-table { width:100%; border-collapse:collapse; min-width:960px; }
+  .lb-table th { text-align:right; padding:8px 10px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .lb-table th:nth-child(-n+2) { text-align:left; }
+  .lb-table th small { display:block; font-size:9px; color:#3a3733; margin-top:1px; }
+  .wt { display:inline-block; padding:1px 5px; background:var(--surface2); border:1px solid var(--border); font-size:9px; color:var(--muted); border-radius:8px; margin-left:3px; }
+  .lb-table td { padding:10px 10px; border-bottom:1px solid var(--border); text-align:right; font-size:12px; transition:background .1s; vertical-align:middle; }
+  .lb-table td:first-child { text-align:left; width:44px; }
+  .lb-table td:nth-child(2) { text-align:left; }
+  .lb-table tr:hover td { background:var(--surface); }
+  .rn { font-family:var(--font-m); font-size:12px; color:var(--muted); }
+  .rank-1 .rn { color:var(--accent); font-weight:700; }
+  .rank-2 .rn { color:#b8b8a8; font-weight:600; }
+  .rank-3 .rn { color:#a07858; }
+  .sname { font-weight:500; }
+  .scity { font-size:10px; color:var(--muted); }
+  .mr { width:22px; height:18px; display:inline-flex; align-items:center; justify-content:center; font-family:var(--font-m); font-size:9px; border-radius:2px; margin-right:3px; }
+  .mr1{background:rgba(201,169,110,.2);color:var(--accent);}
+  .mr2{background:rgba(184,184,168,.12);color:#b8b8a8;}
+  .mr3{background:rgba(160,120,88,.12);color:#a07858;}
+  .mrok{color:var(--muted);} .mrlo{color:var(--red);}
+  .score-num { font-family:var(--font-m); font-weight:700; color:var(--accent); font-size:14px; }
+  .sbar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;width:44px;display:inline-block;vertical-align:middle;margin-right:5px;}
+  .sbar-f{height:100%;background:var(--accent);border-radius:2px;}
+  /* DETAIL */
+  .store-sel{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+  .sbtn{padding:6px 14px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;font-size:11px;letter-spacing:.05em;text-transform:uppercase;transition:all .15s;}
+  .sbtn:hover{color:var(--text);border-color:var(--text);}
+  .sbtn.active{color:var(--accent);border-color:var(--accent);background:rgba(201,169,110,.06);}
+  .shdr{margin-bottom:22px;}
+  .shdr h2{font-family:var(--font-d);font-size:26px;}
+  .shdr .meta{color:var(--muted);font-size:12px;margin-top:4px;}
+  .kgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:11px;margin-bottom:24px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);padding:14px 18px;}
+  .kpi .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px;}
+  .kpi .val{font-family:var(--font-d);font-size:21px;}
+  .kpi .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .kpi .dl{font-size:11px;margin-top:3px;}
+  .kpi.hl .val{color:var(--accent);}
+  .kpi.gd .val{color:var(--green);}
+  .kpi.am .val{color:var(--amber);}
+  .kpi.bd .val{color:var(--red);}
+  .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:800px){.dgrid{grid-template-columns:1fr;}}
+  .dcard{background:var(--surface);border:1px solid var(--border);padding:18px 20px;}
+  .dcard h3{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  .sr{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+  .sr:last-child{border-bottom:none;}
+  .sl{font-size:12px;color:var(--muted);}
+  .sv{font-size:13px;font-family:var(--font-m);display:flex;align-items:center;gap:4px;}
+  footer{margin-top:40px;padding:14px 32px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:20px;}
+</style>
 </head>
 <body>
-  <!-- Password Gate -->
-  <div id="gate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
-    <div style="background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,0.08);text-align:center;">
-      <div style="font-size:32px;margin-bottom:8px;">🌿</div>
-      <h1 style="font-size:18px;font-weight:600;color:#0F172A;margin-bottom:4px;">Olfactory NYC</h1>
-      <p style="font-size:13px;color:#64748B;margin-bottom:28px;">Store Scorecards 2026</p>
-      <input id="pw-input" type="password" placeholder="Enter password"
-        style="width:100%;padding:10px 14px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;transition:border 0.15s;"
-        onkeydown="if(event.key==='Enter')checkPw()"
-        onfocus="this.style.borderColor='#6366F1'" onblur="this.style.borderColor='#CBD5E1'" />
-      <div id="pw-error" style="color:#991B1B;font-size:12px;margin-bottom:10px;display:none;">Incorrect password — please try again.</div>
-      <button onclick="checkPw()"
-        style="width:100%;padding:10px;background:#0F172A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">
-        Enter
-      </button>
-    </div>
+<div id="auth-overlay">
+  <div class="auth-box">
+    <h2>Olfactory NYC</h2>
+    <p>Store Performance Scorecard</p>
+    <input type="password" id="pw" placeholder="Enter password" />
+    <button onclick="checkAuth()">Access Dashboard</button>
+    <div id="auth-error">Incorrect password</div>
   </div>
+</div>
+<div id="app">
+  <header>
+    <div class="logo">Olfactory NYC <span>Store Scorecard</span></div>
+    <div class="badge">Mar 11 – Jun 9, 2026 · 90 Days · <span class="live">● Shopify + Rippling Live</span></div>
+  </header>
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="showView('leaderboard',this)">Leaderboard</button>
+    <button class="tab-btn" onclick="showView('stores',this)">Store Detail</button>
+  </nav>
+  <main>
+    <div id="view-leaderboard" class="view active">
+      <div class="view-hdr"><h2>Location Rankings</h2><p>Weighted composite · 7 metrics · ▲▼ vs Feb 25–May 26 run</p></div>
+      <div class="lb-wrap">
+        <table class="lb-table">
+          <thead><tr>
+            <th></th><th>Location</th>
+            <th>Staffing Efficiency<span class="wt">28%</span><small>Rev / Labor $</small></th>
+            <th>Happiest Staff<span class="wt">23%</span><small>Turnover %</small></th>
+            <th>Happiest Customers<span class="wt">14%</span><small>Google Rating</small></th>
+            <th>Best Upsellers<span class="wt">14%</span><small>Ancillary %</small></th>
+            <th>Sales / Rent<span class="wt">9%</span><small>Rev / Rent $</small></th>
+            <th>Space Efficiency<span class="wt">5%</span><small>Rev / Seat</small></th>
+            <th>Product Satisfaction<span class="wt">7%</span><small>Returns %</small></th>
+            <th>Score</th>
+          </tr></thead>
+          <tbody id="lb-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="view-stores" class="view">
+      <div class="store-sel" id="store-sel"></div>
+      <div id="store-detail"></div>
+    </div>
+  </main>
+  <footer>
+    <div>Revenue: Shopify POS (net) · Ancillary = Custom Oil/Lotion/Mist/Wash/Solid/Diffuser/eDIF · Labor: Rippling Jun 8 2026 · Turnover: Rippling 6-month snapshot, NYC split by clock-in location · ▲▼ vs Feb 25–May 26 2026 run</div>
+    <div>Refreshed Jun 9, 2026</div>
+  </footer>
+</div>
+<script>
+function checkAuth(){
+  if(document.getElementById('pw').value==='customscent'){
+    document.getElementById('auth-overlay').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  } else { document.getElementById('auth-error').style.display='block'; }
+}
+document.getElementById('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') checkAuth(); });
 
-  <!-- App (hidden until password correct) -->
-  <div id="root" style="display:none;"></div>
-
-  <script>
-    function checkPw() {
-      var val = document.getElementById('pw-input').value;
-      if (val === 'customscent') {
-        document.getElementById('gate').style.display = 'none';
-        document.getElementById('root').style.display = 'block';
-        if (window.initApp) { window.initApp(); }
-        else { window._appReady = true; }
-      } else {
-        document.getElementById('pw-error').style.display = 'block';
-        document.getElementById('pw-input').value = '';
-        document.getElementById('pw-input').focus();
-      }
-    }
-  </script>
-
-  <script type="text/babel">
-    const { useState } = React;
-
-const ANCILLARY = {
-  "BLK":   { anc_net: 49198.72, anc_pct: 6.9, anc_orders: 0, py_net: 0, pct_chg: null },
-  "MOT":   { anc_net: 25981.52, anc_pct: 7.3, anc_orders: 0, py_net: 0, pct_chg: null },
-  "WBG":   { anc_net: 23000.24, anc_pct: 8.5, anc_orders: 0, py_net: 0, pct_chg: null },
-  "ATL":   { anc_net: 30775.38, anc_pct: 7.4, anc_orders: 0, py_net: 0, pct_chg: null },
-  "BOS":   { anc_net: 17186.94, anc_pct: 5.5, anc_orders: 0, py_net: 0, pct_chg: null },
-  "UNION": { anc_net: 21096.57, anc_pct: 6.1, anc_orders: 0, py_net: 0, pct_chg: null },
-  "GEO":   { anc_net: 17580.63, anc_pct: 5.8, anc_orders: 0, py_net: 0, pct_chg: null },
-  "PHL":   { anc_net: 22936.47, anc_pct: 6.0, anc_orders: 0, py_net: 0, pct_chg: null },
-  "DAL":   { anc_net: 10906.12, anc_pct: 4.9, anc_orders: 0, py_net: 0, pct_chg: null },
-  "MIA":   { anc_net:  9926.00, anc_pct: 4.9, anc_orders: 0, py_net: 0, pct_chg: null },
+// ============================================================
+// PREVIOUS RUN — Feb 25–May 26 2026 (extracted from uploaded template)
+// ============================================================
+const PREV = {
+  "Bleecker Street":      { score:73.5, rank:1,  rplc:5.19, turnover:43.8, rating:4.9, anc_pct:6.9,  splr:9.94,  splseat:129927, ret_pct:0.21 },
+  "Atlanta Ponce Market": { score:71.1, rank:2,  rplc:4.92, turnover:28.6, rating:4.8, anc_pct:7.4,  splr:12.23, splseat:82986,  ret_pct:0.34 },
+  "281 Mott Street":      { score:70.1, rank:3,  rplc:5.98, turnover:50.0, rating:4.8, anc_pct:7.3,  splr:13.25, splseat:119662, ret_pct:0.36 },
+  "Williamsburg":         { score:67.3, rank:4,  rplc:4.68, turnover:16.6, rating:4.9, anc_pct:8.5,  splr:10.49, splseat:72606,  ret_pct:0.57 },
+  "Union Market":         { score:59.4, rank:5,  rplc:4.99, turnover:42.2, rating:4.7, anc_pct:6.1,  splr:12.73, splseat:63572,  ret_pct:0.53 },
+  "Boston Newbury":       { score:52.5, rank:6,  rplc:4.90, turnover:13.4, rating:4.8, anc_pct:5.5,  splr:5.89,  splseat:74385,  ret_pct:0.65 },
+  "Georgetown":           { score:51.3, rank:7,  rplc:4.47, turnover:33.4, rating:4.9, anc_pct:5.8,  splr:5.86,  splseat:110260, ret_pct:0.15 },
+  "Philadelphia":         { score:47.7, rank:8,  rplc:4.94, turnover:33.4, rating:4.7, anc_pct:6.0,  splr:5.78,  splseat:54998,  ret_pct:0.56 },
+  "Dallas":               { score:31.8, rank:9,  rplc:4.25, turnover:57.2, rating:5.0, anc_pct:4.9,  splr:8.86,  splseat:49727,  ret_pct:0.61 },
+  "Wynwood":              { score:25.3, rank:10, rplc:4.64, turnover:57.2, rating:4.9, anc_pct:4.9,  splr:5.91,  splseat:36681,  ret_pct:0.77 },
 };
 
-// Google Maps ratings (sourced May 2026) — all Olfactory NYC locations
-const RATINGS = {
-  "BLK":   { google: 4.9, google_count: 850,  note: null },
-  "MOT":   { google: 4.8, google_count: 1528, note: null },
-  "WBG":   { google: 4.9, google_count: 397,  note: null },
-  "PHL":   { google: 4.7, google_count: 39,   note: null },
-  "ATL":   { google: 4.8, google_count: 149,  note: null },
-  "BOS":   { google: 4.8, google_count: 403,  note: null },
-  "UNION": { google: 4.7, google_count: 62,   note: null },
-  "GEO":   { google: 4.9, google_count: 526,  note: null },
-  "MIA":   { google: 4.9, google_count: 173,  note: null },
-  "DAL":   { google: 5.0, google_count: 81,   note: null },
+// ============================================================
+// CURRENT DATA — Mar 11–Jun 9 2026
+// ============================================================
+const STORES = [
+  { name:"Bleecker Street",      city:"NYC",          seats:22, rent90:71609.64,  cluster:"nyc" },
+  { name:"281 Mott Street",      city:"NYC",          seats:12, rent90:26896.23,  cluster:"nyc" },
+  { name:"Williamsburg",         city:"NYC",          seats:15, rent90:25813.02,   cluster:"nyc" },
+  { name:"Philadelphia",         city:"Philadelphia", seats:28, rent90:73006.11,  cluster:"philly", note:"Opened Feb 7, 2026" },
+  { name:"Atlanta Ponce Market", city:"Atlanta",      seats:20, rent90:33720.01,   cluster:"atlanta" },
+  { name:"Boston Newbury",       city:"Boston",       seats:17, rent90:53418.76,  cluster:"boston" },
+  { name:"Georgetown",           city:"DC",           seats:11, rent90:51572.07,  cluster:"dc" },
+  { name:"Union Market",         city:"DC",           seats:22, rent90:26993.21,   cluster:"dc" },
+  { name:"Wynwood",              city:"Miami",        seats:22, rent90:34002.64,   cluster:"miami" },
+  { name:"Dallas",               city:"Dallas",       seats:18, rent90:24964.71,  cluster:"dallas" },
+];
+
+const SHOPIFY = {
+  "Bleecker Street":      { gross:800649.90, net:649288.70, returns:1655.50,  orders:5322, ancillary:53964.13 },
+  "Atlanta Ponce Market": { gross:450555.00, net:402502.64, returns:1413.11,  orders:3472, ancillary:32663.63 },
+  "Philadelphia":         { gross:449313.00, net:405795.54, returns:2509.51,  orders:3111, ancillary:26188.88 },
+  "281 Mott Street":      { gross:429863.00, net:364022.16, returns:1210.09,  orders:3034, ancillary:28123.6 },
+  "Union Market":         { gross:372248.00, net:310181.75, returns:1383.90,  orders:2483, ancillary:25913.21 },
+  "Boston Newbury":       { gross:351210.00, net:298038.29, returns:1794.21,  orders:2480, ancillary:22994.11 },
+  "Georgetown":           { gross:338695.00, net:301106.63, returns:454.12,   orders:2378, ancillary:24088.47 },
+  "Williamsburg":         { gross:296270.00, net:260449.38, returns:1501.62,  orders:1879, ancillary:27302.89 },
+  "Dallas":               { gross:232620.00, net:203566.22, returns:1179.28,  orders:1630, ancillary:16797.1 },
+  "Wynwood":              { gross:230460.00, net:198995.60, returns:1545.00,  orders:1662, ancillary:16524.43 },
 };
 
-// Event revenue (Jan–Apr 2026) — in-store events only, offsites excluded
-// Source: HB booking sheets, col A (deposit) + col C (remaining balance)
-// Excludes any line where col G contains "offsite"
-const EVENT_REVENUE = {
-  "BLK":  84734.03,
-  "BOS":  24360.28,
-  "UNION":37495.05,
-  "GEO":   4404.38,
-  "ATL":   8861.48,
-  "MIA":  10957.71,
-  "DAL":   8644.64,
-  "PHL":  11752.56,
-  "MOT":      0.00,
-  "WBG":      0.00,
-};
-
-// Seats per store (customer seating capacity)
-const SEATS = {"BLK":22,"MOT":12,"WBG":15,"BOS":17,"GEO":11,"DAL":18,"MIA":22,"ATL":20,"UNION":22,"PHL":28};
-
-// Lease data — 2026 total rent (base + additional) and square footage
-// Sales/Rent uses per-store annualization via STORE_DAYS
-const LEASE = {
-  "BLK":   { sqft: 1400, rent: 287500.00 },
-  "MOT":   { sqft: 680,  rent: 108400.85 },
-  "WBG":   { sqft: 800,  rent: 103776.95 },
-  "PHL":   { sqft: 2420, rent: 266234.57 },
-  "ATL":   { sqft: 1199, rent: 135657.00 },
-  "BOS":   { sqft: 1101, rent: 214700.00 },
-  "UNION": { sqft: 1200, rent: 109890.00 },
-  "GEO":   { sqft: 690,  rent: 206844.00 },
-  "MIA":   { sqft: 1400, rent: 136657.96 },
-  "DAL":   { sqft: 1073, rent: 100991.07 },
+const LABOR = {
+  "Bleecker Street":127613.12, "281 Mott Street":55759.85, "Williamsburg":52618.98,
+  "Philadelphia":75806.73, "Atlanta Ponce Market":77296.78, "Boston Newbury":60430.42,
+  "Georgetown":61462.53, "Union Market":65847.34, "Wynwood":38825.99, "Dallas":47723.03,
 };
 
 const TURNOVER = {
-  "BLK":   { headcount:32, terminated:7, involuntary:0, voluntary:7, rate6m:21.9, rateAnnual:43.8, isNYC:false },
-  "MOT":   { headcount:16, terminated:4, involuntary:0, voluntary:4, rate6m:25.0, rateAnnual:50.0, isNYC:false },
-  "WBG":   { headcount:12, terminated:1, involuntary:0, voluntary:1, rate6m:8.3,  rateAnnual:16.6, isNYC:false },
-  "PHL":   { headcount:18, terminated:3, involuntary:2, voluntary:1, rate6m:16.7, rateAnnual:33.4, isNYC:false },
-  "ATL":   { headcount:21, terminated:3, involuntary:1, voluntary:2, rate6m:14.3, rateAnnual:28.6, isNYC:false },
-  "BOS":   { headcount:15, terminated:1, involuntary:1, voluntary:0, rate6m:6.7,  rateAnnual:13.4, isNYC:false },
-  "UNION": { headcount:19, terminated:4, involuntary:0, voluntary:4, rate6m:21.1, rateAnnual:42.2, isNYC:false },
-  "GEO":   { headcount:12, terminated:2, involuntary:0, voluntary:2, rate6m:16.7, rateAnnual:33.4, isNYC:false },
-  "MIA":   { headcount:14, terminated:4, involuntary:1, voluntary:3, rate6m:28.6, rateAnnual:57.2, isNYC:false },
-  "DAL":   { headcount:14, terminated:4, involuntary:1, voluntary:3, rate6m:28.6, rateAnnual:57.2, isNYC:false },
+  "Bleecker Street":27.6, "281 Mott Street":40.0, "Williamsburg":15.4,
+  "Philadelphia":28.6, "Atlanta Ponce Market":18.8, "Boston Newbury":6.1,
+  "Georgetown":13.3, "Union Market":30.8, "Wynwood":34.8, "Dallas":38.1,
 };
 
-
-// Labor costs from Rippling clock-in hours — each store uses its own clock-in data
-// NYC_CLUSTER retained only for turnover display (shared headcount metric)
-const NYC_CLUSTER = ["BLK", "MOT", "WBG"];
-
-// Period lengths — YTD Jan 1–May 14 except Philadelphia (QTD Apr 1–May 11, new store)
-const STORE_DAYS = {
-  BLK:91, MOT:91, WBG:91, ATL:91, BOS:91,
-  UNION:91, GEO:91, MIA:91, DAL:91, PHL:91
-};
-const ANNUALIZATION = 365 / 134; // default YTD; per-store: 365/STORE_DAYS[code]
-
-const stores = [
-  { name: "Bleecker Street",      code: "BLK",   city: "New York, NY",       gross_sales: 812096.90,  net_sales: 712641.57,  discounts: -150182.20, returns: -1506.16,  labor_cost: 137382.00, hours: 6561.0, headcount: 48, event_rev: 52233.03 },
-  { name: "Atlanta Ponce Market", code: "ATL",   city: "Atlanta, GA",        gross_sales: 455725.00,  net_sales: 413793.80,  discounts: -45969.25,  returns: -1423.90,  labor_cost: 84070.00,  hours: 4277.0, headcount: 21, event_rev: 5461.95  },
-  { name: "281 Mott Street",      code: "MOT",   city: "New York, NY",       gross_sales: 418673.00,  net_sales: 358003.11,  discounts: -59367.25,  returns: -1302.64,  labor_cost: 59911.00,  hours: 3105.0, headcount: 39, event_rev: 0.00     },
-  { name: "Union Market",         code: "UNION", city: "Washington, DC",     gross_sales: 381328.00,  net_sales: 348690.51,  discounts: -53898.60,  returns: -1852.10,  labor_cost: 69819.00,  hours: 3294.0, headcount: 20, event_rev: 23113.21 },
-  { name: "Boston Newbury",       code: "BOS",   city: "Boston, MA",         gross_sales: 352560.00,  net_sales: 315271.97,  discounts: -50245.50,  returns: -2059.00,  labor_cost: 64317.00,  hours: 2997.0, headcount: 14, event_rev: 15016.47 },
-  { name: "Georgetown",           code: "GEO",   city: "Washington, DC",     gross_sales: 332575.00,  net_sales: 302385.63,  discounts: -32449.50,  returns: -454.12,   labor_cost: 67718.00,  hours: 2921.0, headcount: 13, event_rev: 2714.25  },
-  { name: "Williamsburg",         code: "WBG",   city: "Brooklyn, NY",       gross_sales: 304435.00,  net_sales: 271525.50,  discounts: -31352.00,  returns: -1557.50,  labor_cost: 58059.00,  hours: 2862.0, headcount: 28, event_rev: 0.00     },
-  { name: "Philadelphia",         code: "PHL",   city: "Philadelphia, PA",   gross_sales: 418658.00,  net_sales: 383934.55,  discounts: -39818.20,  returns: -2149.51,  labor_cost: 77752.00,  hours: 3922.0, headcount: 19, event_rev: 7244.26  },
-  { name: "Dallas",               code: "DAL",   city: "Dallas, TX",         gross_sales: 244676.00,  net_sales: 223157.26,  discounts: -25478.75,  returns: -1369.28,  labor_cost: 52497.00,  hours: 2546.0, headcount: 14, event_rev: 5329.29  },
-  { name: "Wynwood",              code: "MIA",   city: "Miami, FL",          gross_sales: 225750.00,  net_sales: 201191.58,  discounts: -29769.15,  returns: -1545.00,  labor_cost: 43382.00,  hours: 2079.0, headcount: 12, event_rev: 6755.73  },
-];
-
-// All stores now use individual labor figures
-// Step 1: compute raw metrics for every store
-const _raw = stores.map(s => {
-  const isNYC  = NYC_CLUSTER.includes(s.code);
-  const lcp    = (s.labor_cost / s.net_sales) * 100;
-  const rplc   = s.net_sales / s.labor_cost;
-  const splh   = s.net_sales / s.hours;
-  const disc_pct = Math.abs(s.discounts / s.gross_sales) * 100;
-  const anc    = ANCILLARY[s.code]?.anc_pct ?? 0;
-  const google = RATINGS[s.code]?.google ?? 0;
-  const turn   = TURNOVER[s.code]?.rateAnnual ?? 999;
-  const l      = LEASE[s.code];
-  const annSales = s.net_sales * (365 / (STORE_DAYS[s.code] || 134));
-  const splr    = l ? annSales / l.rent  : 0;
-  const splseat = SEATS[s.code] ? annSales / SEATS[s.code] : 0;
-  const ret_pct  = s.net_sales > 0 ? Math.abs(s.returns) / s.net_sales * 100 : 0;
-  return { ...s, isNYC, lcp: +lcp.toFixed(1), rplc: +rplc.toFixed(2), splh: +splh.toFixed(2), disc_pct: +disc_pct.toFixed(1), anc, google, turn, splr: +splr.toFixed(2), splseat: +splseat.toFixed(0), ret_pct: +ret_pct.toFixed(2) };
-});
-
-// Step 2: rank each store per metric (1 = best)
-function rankMetric(arr, key, higherIsBetter) {
-  const sorted = [...arr].sort((a, b) => higherIsBetter ? b[key] - a[key] : a[key] - b[key]);
-  const rankMap = {};
-  sorted.forEach((s, i) => { rankMap[s.code] = i + 1; });
-  return rankMap;
-}
-const ranks = {
-  rplc:    rankMetric(_raw, "rplc",    true),
-  turn:    rankMetric(_raw, "turn",    false),
-  google:  rankMetric(_raw, "google",  true),
-  anc:     rankMetric(_raw, "anc",     true),
-  splr:    rankMetric(_raw, "splr",    true),
-  splseat: rankMetric(_raw, "splseat", true),
-  ret_pct: rankMetric(_raw, "ret_pct", false),  // lower returns % = better
+const RATINGS = {
+  "Bleecker Street":4.9, "281 Mott Street":4.8, "Williamsburg":4.9,
+  "Philadelphia":4.7, "Atlanta Ponce Market":4.8, "Boston Newbury":4.8,
+  "Georgetown":4.9, "Union Market":4.7, "Wynwood":4.9, "Dallas":5.0,
 };
 
-// Step 3: weighted rank score — weights in priority order
-const WEIGHTS = { rplc: 28, turn: 23, google: 14, anc: 14, splr: 9, splseat: 5, ret_pct: 7 };
-const N = stores.length;
-const enriched = _raw.map(s => {
-  const score = Math.round(
-    Object.entries(WEIGHTS).reduce((sum, [k, w]) => {
-      return sum + w * (N + 1 - ranks[k][s.code]) / N;
-    }, 0)
-  );
-  return { ...s, score, ranks: { rplc: ranks.rplc[s.code], turn: ranks.turn[s.code], google: ranks.google[s.code], anc: ranks.anc[s.code], splr: ranks.splr[s.code], splseat: ranks.splseat[s.code], ret_pct: ranks.ret_pct[s.code] } };
-});
-enriched.sort((a, b) => b.score - a.score);
+const HB = {
+  "Bleecker Street":61447, "281 Mott Street":12900, "Williamsburg":33878,
+  "Boston Newbury":18148, "Atlanta Ponce Market":14163, "Union Market":17512,
+};
 
-const fmt$ = v => "$" + Math.round(v).toLocaleString();
-const fmtK = v => "$" + (v / 1000).toFixed(1) + "K";
-const fmtPct = v => v.toFixed(1) + "%";
-
-function scoreStyle(s) {
-  if (s >= 70) return { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" };
-  if (s >= 45) return { bg: "#FEF9C3", text: "#854D0E", border: "#FDE047" };
-  return { bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5" };
-}
-
-function lcpStyle(v) {
-  if (v <= 21) return "#166534";
-  if (v <= 24) return "#854D0E";
-  return "#991B1B";
-}
-
-function RankBadge({ rank, total = 10 }) {
-  const bg   = rank <= 3 ? "#DCFCE7" : rank <= 6 ? "#FEF9C3" : "#FEE2E2";
-  const text = rank <= 3 ? "#166534" : rank <= 6 ? "#854D0E" : "#991B1B";
-  return (
-    <div title={`Ranked #${rank} of ${total}`} style={{ width: 22, height: 22, borderRadius: "50%", background: bg, color: text, fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: `1.5px solid ${text}`, lineHeight: 1 }}>
-      {rank}
-    </div>
-  );
-}
-
-function KpiCard({ label, value, sub, highlight, rank }) {
-  return (
-    <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "14px 16px", border: "1px solid #E2E8F0" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-        <div style={{ fontSize: 11, color: "#64748B", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em" }}>{label}</div>
-        {rank != null && <RankBadge rank={rank} />}
-      </div>
-      <div style={{ fontSize: 20, fontWeight: 600, color: highlight || "#0F172A" }}>{value}</div>
-      {sub && <div style={{ fontSize: 12, color: "#94A3B8", marginTop: 2 }}>{sub}</div>}
-    </div>
-  );
-}
-
-function MiniBar({ pct, color }) {
-  return (
-    <div style={{ flex: 1, height: 6, background: "#E2E8F0", borderRadius: 3, overflow: "hidden" }}>
-      <div style={{ width: `${pct}%`, height: "100%", background: color || "#6366F1", borderRadius: 3, transition: "width 0.5s ease" }} />
-    </div>
-  );
-}
-
-function App() {
-  const [selected, setSelected] = useState(enriched[0].code);
-  const [view, setView] = useState("detail"); // "detail" | "table"
-  const store = enriched.find(s => s.code === selected);
-  const ss = scoreStyle(store.score);
-  const allNetMax = Math.max(...enriched.map(s => s.net_sales));
-
-  return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", background: "#F1F5F9", minHeight: "100vh", padding: "24px 20px" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#0F172A" }}>Store Scorecards</h1>
-          <p style={{ margin: "3px 0 0", fontSize: 13, color: "#64748B" }}>Feb 25 – May 26, 2026 (Last 90 Days) · Shopify POS + Rippling <span style={{color:"#94A3B8"}}>(all stores Feb 25 – May 26)</span></p>
-        </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          {["detail", "table"].map(v => (
-            <button key={v} onClick={() => setView(v)}
-              style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid #CBD5E1", background: view === v ? "#0F172A" : "#fff", color: view === v ? "#fff" : "#475569", fontSize: 13, cursor: "pointer", fontWeight: 500 }}>
-              {v === "detail" ? "Store view" : "Leaderboard"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {view === "table" ? (
-        // Rank Matrix Leaderboard
-        <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E2E8F0", overflow: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-            <thead>
-              <tr style={{ background: "#F8FAFC", borderBottom: "2px solid #E2E8F0" }}>
-                <th style={{ padding: "14px 16px", textAlign: "left", fontWeight: 600, color: "#0F172A", fontSize: 12, whiteSpace: "nowrap", position: "sticky", left: 0, background: "#F8FAFC", zIndex: 1 }}>Store</th>
-                {[
-                  { key: "rplc",    label: "Staffing Efficiency",  sub: "Rev / Labor $"   },
-                  { key: "turn",    label: "Happiest Staff",        sub: "Turnover rate"   },
-                  { key: "google",  label: "Happiest Customers",    sub: "Google Rating"   },
-                  { key: "anc",     label: "Best Upsellers",        sub: "Ancillary %"     },
-                  { key: "splr",    label: "Sales / Rent $",        sub: "higher = better" },
-                  { key: "splseat", label: "Space Efficiency",      sub: "Sales / Seat"    },
-                  { key: "ret_pct", label: "Product Satisfaction",   sub: "Returns % of sales" },
-                ].map(col => (
-                  <th key={col.key} style={{ padding: "14px 20px", textAlign: "center", fontWeight: 500, color: "#64748B", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>
-                    <div>{col.label}</div>
-                    <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 400, textTransform: "none", letterSpacing: 0, marginTop: 2 }}>{col.sub}</div>
-                  </th>
-                ))}
-                <th style={{ padding: "14px 20px", textAlign: "center", fontWeight: 500, color: "#64748B", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  <div>Overall</div>
-                  <div style={{ fontSize: 10, color: "#94A3B8", fontWeight: 400, textTransform: "none", letterSpacing: 0, marginTop: 2 }}>score</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {enriched.map((s, i) => {
-                const ss2 = scoreStyle(s.score);
-                const RANK_KEYS = ["rplc", "turn", "google", "anc", "splr", "splseat", "ret_pct"];
-                return (
-                  <tr key={s.code}
-                    onClick={() => { setSelected(s.code); setView("detail"); }}
-                    style={{ borderBottom: "1px solid #F1F5F9", cursor: "pointer" }}
-                    onMouseEnter={e => e.currentTarget.style.background = "#F8FAFC"}
-                    onMouseLeave={e => e.currentTarget.style.background = "#fff"}>
-                    {/* Store name cell */}
-                    <td style={{ padding: "14px 16px", position: "sticky", left: 0, background: "#fff", zIndex: 1, borderRight: "1px solid #F1F5F9" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#64748B", flexShrink: 0 }}>
-                          {i + 1}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 500, color: "#0F172A", fontSize: 13 }}>{s.name}</div>
-                          <div style={{ fontSize: 11, color: "#94A3B8" }}>{s.city}</div>
-                        </div>
-                      </div>
-                    </td>
-                    {/* Rank badge cells */}
-                    {RANK_KEYS.map(key => {
-                      const rank = s.ranks[key];
-                      const bg   = rank <= 3 ? "#DCFCE7" : rank <= 6 ? "#FEF9C3" : "#FEE2E2";
-                      const text = rank <= 3 ? "#166534" : rank <= 6 ? "#854D0E" : "#991B1B";
-                      const border = rank <= 3 ? "#86EFAC" : rank <= 6 ? "#FDE047" : "#FCA5A5";
-                      return (
-                        <td key={key} style={{ padding: "14px 20px", textAlign: "center" }}>
-                          <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: "50%", background: bg, border: `2px solid ${border}`, color: text, fontSize: 15, fontWeight: 700 }}>
-                            {rank}
-                          </div>
-                        </td>
-                      );
-                    })}
-                    {/* Overall score */}
-                    <td style={{ padding: "14px 20px", textAlign: "center" }}>
-                      <span style={{ background: ss2.bg, color: ss2.text, border: `1.5px solid ${ss2.border}`, borderRadius: 8, padding: "4px 12px", fontWeight: 700, fontSize: 14, display: "inline-block" }}>
-                        {s.score}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {/* Legend */}
-          <div style={{ display: "flex", gap: 16, padding: "12px 16px", borderTop: "1px solid #F1F5F9", background: "#FAFAFA" }}>
-            <span style={{ fontSize: 11, color: "#64748B", fontWeight: 500 }}>Rank key:</span>
-            {[["#DCFCE7","#86EFAC","#166534","#1 – 3 Top"],["#FEF9C3","#FDE047","#854D0E","#4 – 6 Mid"],["#FEE2E2","#FCA5A5","#991B1B","#7 – 10 Bottom"]].map(([bg,bd,tx,label]) => (
-              <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
-                <div style={{ width: 18, height: 18, borderRadius: "50%", background: bg, border: `2px solid ${bd}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontSize: 8, fontWeight: 700, color: tx }}>1</span>
-                </div>
-                <span style={{ fontSize: 11, color: "#64748B" }}>{label}</span>
-              </div>
-            ))}
-            <span style={{ fontSize: 11, color: "#94A3B8", marginLeft: "auto" }}>Click any row to see full store detail →</span>
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 16 }}>
-          {/* Store List */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {enriched.map((s, i) => {
-              const ss2 = scoreStyle(s.score);
-              const active = s.code === selected;
-              return (
-                <button key={s.code} onClick={() => setSelected(s.code)}
-                  style={{ textAlign: "left", padding: "11px 13px", borderRadius: 10, border: active ? "1.5px solid #6366F1" : "1px solid #E2E8F0", background: active ? "#EEF2FF" : "#fff", cursor: "pointer", transition: "all 0.15s" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
-                    <span style={{ fontSize: 12, color: "#94A3B8" }}>#{i + 1}</span>
-                    <span style={{ background: ss2.bg, color: ss2.text, borderRadius: 5, padding: "1px 7px", fontSize: 11, fontWeight: 600 }}>{s.score}</span>
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: active ? "#4338CA" : "#0F172A", lineHeight: 1.3 }}>{s.name}</div>
-                  <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}>{fmtK(s.net_sales)} net sales</div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Detail Panel */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            {/* Store Header */}
-            <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E2E8F0", padding: "20px 22px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                  <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "#0F172A" }}>{store.name}</h2>
-                  {store.isNYC && <span style={{ fontSize: 11, fontWeight: 600, background: "#EEF2FF", color: "#4338CA", border: "1px solid #C7D2FE", borderRadius: 5, padding: "2px 7px" }}>NYC Cluster</span>}
-                </div>
-                <p style={{ margin: 0, fontSize: 13, color: "#64748B" }}>📍 {store.city}</p>
-                {store.isNYC && <p style={{ margin: "3px 0 0", fontSize: 12, color: "#94A3B8" }}>Workforce shared across Bleecker · Mott · Williamsburg (49 total)</p>}
-              </div>
-              <div style={{ textAlign: "center", background: ss.bg, border: `2px solid ${ss.border}`, borderRadius: "50%", width: 64, height: 64, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <span style={{ fontSize: 22, fontWeight: 700, color: ss.text, lineHeight: 1 }}>{store.score}</span>
-                <span style={{ fontSize: 10, color: ss.text, fontWeight: 500 }}>score</span>
-              </div>
-            </div>
-
-            {/* Sales KPIs */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Sales Performance</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-                <KpiCard label="Gross Sales" value={fmt$(store.gross_sales)} />
-                <KpiCard label="Net Sales (Shopify)" value={fmt$(store.net_sales - store.event_rev)} highlight="#4338CA" />
-                <KpiCard label="Event Revenue" value={store.event_rev > 0 ? fmt$(store.event_rev) : "—"} sub={store.event_rev > 0 ? `${((store.event_rev/store.net_sales)*100).toFixed(1)}% of total` : "no events"} highlight={store.event_rev > 0 ? "#166534" : "#94A3B8"} />
-                <KpiCard label="Combined Net Sales" value={fmt$(store.net_sales)} highlight="#0F172A" />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginTop: 10 }}>
-                <KpiCard label="Discounts" value={fmtPct(store.disc_pct)} sub={fmt$(Math.abs(store.discounts))} highlight={store.disc_pct > 18 ? "#991B1B" : "#166534"} />
-                <KpiCard label="Returns" value={fmt$(Math.abs(store.returns))} />
-              </div>
-            </div>
-
-            {/* Space & Rent */}
-            {(() => {
-              const l = LEASE[store.code];
-              if (!l) return null;
-              const storeAnn  = 365 / (STORE_DAYS[store.code] || 134);
-              const annSales  = store.net_sales * storeAnn;
-              const splseat   = SEATS[store.code] ? annSales / SEATS[store.code] : null;
-              const splr      = annSales / l.rent;
-              const maxSplseat = Math.max(...Object.keys(SEATS).map(c => {
-                const s2 = enriched.find(x => x.code === c);
-                return s2 ? s2.net_sales * (365 / (STORE_DAYS[c] || 134)) / SEATS[c] : 0;
-              }));
-              const maxSplr = Math.max(...Object.entries(LEASE).map(([c, d]) => {
-                const s2 = enriched.find(x => x.code === c);
-                return s2 ? s2.net_sales * (365 / (STORE_DAYS[c] || 134)) / d.rent : 0;
-              }));
-              const seatColor = splseat >= 90000 ? "#166534" : splseat >= 60000 ? "#854D0E" : "#991B1B";
-              const rentColor = splr >= 10 ? "#166534" : splr >= 7 ? "#854D0E" : "#991B1B";
-              return (
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Space &amp; Rent <span style={{ fontWeight: 400, fontSize: 10, textTransform: "none" }}>(annualized — Last 91 days, PHL QTD 41 days)</span></div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Seats" value={SEATS[store.code] || "—"} sub="customer seating" />
-                    <KpiCard label="Total Annual Rent" value={fmt$(l.rent)} sub="base + additional" />
-                    <KpiCard label="Sales / Seat" value={splseat ? fmt$(splseat) : "—"} sub="annualized" highlight={seatColor} rank={store.ranks.splseat} />
-                    <KpiCard label="Sales / Rent $" value={`$${splr.toFixed(2)}`} sub="per $1 of rent" highlight={rentColor} rank={store.ranks.splr} />
-                  </div>
-                  {/* Comparison bars */}
-                  <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-                      <div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Sales / Seat</div>
-                        {Object.keys(SEATS).sort((a, b) => {
-                          const sa = enriched.find(x => x.code === a);
-                          const sb = enriched.find(x => x.code === b);
-                          return (sb ? sb.net_sales * (365/(STORE_DAYS[b]||134)) / SEATS[b] : 0) - (sa ? sa.net_sales * (365/(STORE_DAYS[a]||134)) / SEATS[a] : 0);
-                        }).map(code => {
-                          const s2 = enriched.find(x => x.code === code);
-                          if (!s2) return null;
-                          const val = s2.net_sales * (365/(STORE_DAYS[code]||134)) / SEATS[code];
-                          const isActive = code === store.code;
-                          return (
-                            <div key={code} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
-                              <div style={{ width: 90, fontSize: 11, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s2.name}</div>
-                              <MiniBar pct={(val / maxSplseat) * 100} color={isActive ? "#6366F1" : "#CBD5E1"} />
-                              <div style={{ width: 52, fontSize: 11, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>{fmt$(val)}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Sales / Rent $</div>
-                        {Object.entries(LEASE).sort((a, b) => {
-                          const sa = enriched.find(x => x.code === a[0]);
-                          const sb = enriched.find(x => x.code === b[0]);
-                          return (sb ? sb.net_sales * (365/(STORE_DAYS[b[0]]||134)) / b[1].rent : 0) - (sa ? sa.net_sales * (365/(STORE_DAYS[a[0]]||134)) / a[1].rent : 0);
-                        }).map(([code, d]) => {
-                          const s2 = enriched.find(x => x.code === code);
-                          if (!s2) return null;
-                          const val = s2.net_sales * (365/(STORE_DAYS[code]||134)) / d.rent;
-                          const isActive = code === store.code;
-                          return (
-                            <div key={code} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
-                              <div style={{ width: 90, fontSize: 11, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s2.name}</div>
-                              <MiniBar pct={(val / maxSplr) * 100} color={isActive ? "#6366F1" : "#CBD5E1"} />
-                              <div style={{ width: 40, fontSize: 11, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>${val.toFixed(2)}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Workforce KPIs */}
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Workforce</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-                <KpiCard label="Hours Worked" value={store.hours.toLocaleString()} sub="this period" />
-                <KpiCard label="Labor Cost" value={fmt$(store.labor_cost)} />
-                <KpiCard label="Labor Cost %" value={fmtPct(store.lcp)} highlight={lcpStyle(store.lcp)} />
-                <KpiCard label="Rev / Labor $" value={`$${store.rplc.toFixed(2)}`} sub="per $1 of labor cost" highlight={store.rplc >= 4.5 ? "#166534" : store.rplc >= 3.5 ? "#854D0E" : "#991B1B"} rank={store.ranks.rplc} />
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginTop: 10 }}>
-                <KpiCard label="Sales / Labor Hour" value={`$${store.splh.toFixed(2)}`} sub="net sales per hour worked" highlight={store.splh >= 100 ? "#166534" : store.splh >= 85 ? "#854D0E" : "#991B1B"} />
-                <KpiCard label="Headcount" value={store.headcount} sub="active employees" />
-              </div>
-            </div>
-
-            {/* Ancillary Sales */}
-            {(() => {
-              const anc = ANCILLARY[store.code];
-              if (!anc) return null;
-              const ancColor = anc.anc_pct >= 9 ? "#166534" : anc.anc_pct >= 7.5 ? "#854D0E" : "#991B1B";
-              const maxAncPct = Math.max(...Object.values(ANCILLARY).map(a => a.anc_pct));
-              return (
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Ancillary Sales (Upsell)</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Anc. % of Sales" value={fmtPct(anc.anc_pct)} sub="key upsell metric" highlight={ancColor} rank={store.ranks.anc} />
-                    <KpiCard label="vs Prior Year" value={anc.pct_chg != null ? `${anc.pct_chg > 0 ? "+" : ""}${anc.pct_chg.toFixed(0)}%` : "N/A"} sub={anc.py_net ? `was $${Math.round(anc.py_net).toLocaleString()}` : "new location"} highlight={anc.pct_chg > 0 ? "#166534" : anc.pct_chg < 0 ? "#991B1B" : undefined} />
-                    <KpiCard label="Anc. Net Sales" value={fmt$(anc.anc_net)} />
-                    <KpiCard label="Anc. Orders" value={anc.anc_orders.toLocaleString()} />
-                  </div>
-                  {/* Ancillary % bar chart across all stores */}
-                  <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Ancillary % of Sales — All Stores</div>
-                    {Object.entries(ANCILLARY)
-                      .sort((a, b) => b[1].anc_pct - a[1].anc_pct)
-                      .map(([code, a]) => {
-                        const s2 = enriched.find(x => x.code === code);
-                        const isActive = code === store.code;
-                        return (
-                          <div key={code} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                            <div style={{ width: 120, fontSize: 12, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s2?.name || code}</div>
-                            <MiniBar pct={(a.anc_pct / maxAncPct) * 100} color={isActive ? "#6366F1" : "#CBD5E1"} />
-                            <div style={{ width: 44, fontSize: 12, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>{fmtPct(a.anc_pct)}</div>
-                            <div style={{ width: 50, fontSize: 11, color: a.pct_chg > 0 ? "#166534" : "#991B1B", flexShrink: 0 }}>{a.pct_chg != null ? (a.pct_chg > 0 ? "▲" : "▼") + Math.abs(a.pct_chg).toFixed(0) + "%" : "—"}</div>
-                          </div>
-                        );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Revenue Comparison */}
-            <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #E2E8F0", padding: "18px 20px" }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 14 }}>Net Sales by Store</div>
-              {enriched.map(s => (
-                <div key={s.code} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
-                  <div style={{ width: 120, fontSize: 12, color: s.code === selected ? "#4338CA" : "#475569", fontWeight: s.code === selected ? 600 : 400, flexShrink: 0, textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={s.name}>{s.name}</div>
-                  <MiniBar pct={(s.net_sales / allNetMax) * 100} color={s.code === selected ? "#6366F1" : "#CBD5E1"} />
-                  <div style={{ width: 64, fontSize: 12, color: "#64748B", flexShrink: 0 }}>{fmtK(s.net_sales)}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Ratings */}
-            {(() => {
-              const r = RATINGS[store.code];
-              if (!r) return null;
-              const starColor = r.google >= 4.5 ? "#166534" : r.google >= 4.0 ? "#854D0E" : r.google ? "#991B1B" : "#94A3B8";
-              const stars = r.google ? "★".repeat(Math.round(r.google)) + "☆".repeat(5 - Math.round(r.google)) : null;
-              const maxRating = 5;
-              return (
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Customer Ratings</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard
-                      label="Google Rating"
-                      value={r.google ? `${r.google.toFixed(1)} ★` : "—"}
-                      sub={r.google ? `${r.google_count} reviews` : r.note}
-                      highlight={starColor}
-                      rank={store.ranks.google}
-                    />
-                    <KpiCard label="Yelp Rating" value="—" sub="Not connected" />
-                    <KpiCard label="Review Count" value={r.google_count || "—"} sub={r.note || "Google Maps"} />
-                  </div>
-                  {r.note && (
-                    <div style={{ fontSize: 12, color: "#854D0E", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 12px", marginBottom: 8 }}>
-                      ⚠ {r.note} — confirm this matches your store location
-                    </div>
-                  )}
-                  {/* Rating comparison bar chart */}
-                  <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Google Rating — All Stores</div>
-                    {Object.entries(RATINGS)
-                      .filter(([, v]) => v.google !== null)
-                      .sort((a, b) => b[1].google - a[1].google)
-                      .map(([code, rat]) => {
-                        const s2 = enriched.find(x => x.code === code);
-                        const isActive = code === store.code;
-                        const barClr = rat.google >= 4.5 ? "#86EFAC" : rat.google >= 4.0 ? "#FDE68A" : "#FCA5A5";
-                        const activeClr = rat.google >= 4.5 ? "#16A34A" : rat.google >= 4.0 ? "#D97706" : "#DC2626";
-                        return (
-                          <div key={code} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                            <div style={{ width: 120, fontSize: 12, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s2?.name || code}</div>
-                            <MiniBar pct={(rat.google / maxRating) * 100} color={isActive ? activeClr : barClr} />
-                            <div style={{ width: 32, fontSize: 12, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>{rat.google.toFixed(1)}</div>
-                            <div style={{ width: 55, fontSize: 11, color: "#94A3B8", flexShrink: 0 }}>({rat.google_count})</div>
-                            {rat.note && <span style={{ fontSize: 10, color: "#D97706" }}>⚠</span>}
-                          </div>
-                        );
-                    })}
-                    <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 8, borderTop: "1px solid #F1F5F9", paddingTop: 8 }}>
-                      Yelp ratings not yet connected
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Turnover */}
-            {(() => {
-              const tv = TURNOVER[store.code];
-              if (!tv) return null;
-              const turnColor = tv.rateAnnual >= 40 ? "#991B1B" : tv.rateAnnual >= 25 ? "#854D0E" : "#166534";
-              const maxRate = Math.max(...Object.values(TURNOVER).filter((v,i,a) => a.indexOf(v)===i).map(v => v.rateAnnual));
-              // deduplicated store entries for bar chart
-              const tvEntries = Object.entries(TURNOVER).filter(([code]) => !["MOT","WBG"].includes(code));
-              return (
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Turnover (Last 6 Months)</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="×2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} />
-                    <KpiCard label="6-Month Rate" value={fmtPct(tv.rate6m)} sub={`${tv.terminated} terminated`} />
-                    <KpiCard label="Voluntary" value={tv.voluntary} sub={`${tv.terminated > 0 ? Math.round(tv.voluntary/tv.terminated*100) : 0}% of exits`} />
-                    <KpiCard label="Involuntary" value={tv.involuntary} sub={`${tv.terminated > 0 ? Math.round(tv.involuntary/tv.terminated*100) : 0}% of exits`} highlight={tv.involuntary > 2 ? "#991B1B" : undefined} />
-                  </div>
-                  <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Annualized Turnover — All Stores</div>
-                    {tvEntries
-                      .sort((a, b) => b[1].rateAnnual - a[1].rateAnnual)
-                      .map(([code, t]) => {
-                        const s2 = enriched.find(x => x.code === code);
-                        const label = t.isNYC ? "NYC Cluster" : s2?.name || code;
-                        const isActive = code === store.code || (tv.isNYC && t.isNYC);
-                        const barColor = t.rateAnnual >= 40 ? "#FCA5A5" : t.rateAnnual >= 25 ? "#FDE68A" : "#86EFAC";
-                        const activeBarColor = t.rateAnnual >= 40 ? "#DC2626" : t.rateAnnual >= 25 ? "#D97706" : "#16A34A";
-                        return (
-                          <div key={code} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                            <div style={{ width: 120, fontSize: 12, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</div>
-                            <MiniBar pct={(t.rateAnnual / maxRate) * 100} color={isActive ? activeBarColor : barColor} />
-                            <div style={{ width: 44, fontSize: 12, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>{fmtPct(t.rateAnnual)}</div>
-                            <div style={{ width: 60, fontSize: 11, color: "#94A3B8", flexShrink: 0 }}>{t.terminated} left</div>
-                          </div>
-                        );
-                    })}
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Flags */}
-            {(() => {
-              const tv = TURNOVER[store.code];
-              const flags = [];
-              if (store.lcp > 30) flags.push(`Labor cost % of ${fmtPct(store.lcp)} is elevated — review scheduling`);
-              if (store.disc_pct > 18) flags.push(`Discount rate of ${fmtPct(store.disc_pct)} is high — review promotional activity`);
-              if (tv && tv.rateAnnual >= 40) flags.push(`Annualized turnover of ${fmtPct(tv.rateAnnual)} is critical — urgent retention action needed`);
-              else if (tv && tv.rateAnnual >= 25) flags.push(`Annualized turnover of ${fmtPct(tv.rateAnnual)} is above healthy range`);
-              if (tv && tv.involuntary >= 2) flags.push(`${tv.involuntary} involuntary terminations in 6 months — review management practices`);
-              if (!flags.length) return null;
-              return (
-                <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 12, padding: "14px 18px" }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#9A3412", marginBottom: 8 }}>⚠ Flags</div>
-                  {flags.map((f, i) => <div key={i} style={{ fontSize: 13, color: "#9A3412", marginBottom: i < flags.length-1 ? 4 : 0 }}>• {f}</div>)}
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-    window.initApp = function() {
-      const rootEl = ReactDOM.createRoot(document.getElementById('root'));
-      rootEl.render(<App />);
+// ============================================================
+// COMPUTE CURRENT SCORES
+// ============================================================
+function computeScores(){
+  const rows = STORES.map(s => {
+    const sh = SHOPIFY[s.name];
+    const g = sh.gross;
+    return {
+      ...s,
+      gross:g, net:sh.net, returns_amt:sh.returns, orders:sh.orders, ancillary:sh.ancillary,
+      anc_pct:   sh.ancillary / g * 100,
+      ret_pct:   sh.returns   / g * 100,
+      rplc:      sh.net / LABOR[s.name],
+      splr:      g / s.rent90,
+      splseat:   g / s.seats,
+      labor:     LABOR[s.name],
+      turnover:  TURNOVER[s.name],
+      rating:    RATINGS[s.name],
+      hb_rev:    HB[s.name] || 0,
     };
-    if (window._appReady) { window.initApp(); }
-  </script>
+  });
+
+  function rnk(key, lb=false){
+    const s=[...rows].sort((a,b)=>lb?a[key]-b[key]:b[key]-a[key]);
+    const m={};s.forEach((r,i)=>m[r.name]=i+1);return m;
+  }
+  const n=rows.length, rf=r=>(n+1-r)/n;
+  const W={rplc:.28,turnover:.23,rating:.14,anc_pct:.14,splr:.09,splseat:.05,ret_pct:.07};
+  const R={
+    rplc:rnk('rplc'),turnover:rnk('turnover',true),rating:rnk('rating'),
+    anc_pct:rnk('anc_pct'),splr:rnk('splr'),splseat:rnk('splseat'),ret_pct:rnk('ret_pct',true),
+  };
+  return rows.map(r=>{
+    const s=r.name;
+    const score=Object.entries(W).reduce((sum,[k,w])=>sum+w*rf(R[k][s])*100,0);
+    return {...r,score:Math.round(score*10)/10,
+      rs:R.rplc[s],rt:R.turnover[s],rg:R.rating[s],ra:R.anc_pct[s],
+      rr:R.splr[s],rsp:R.splseat[s],rret:R.ret_pct[s]};
+  }).sort((a,b)=>b.score-a.score);
+}
+
+// ============================================================
+// DELTA HELPERS
+// ============================================================
+function arr(curr,prev,hiGood=true,thresh=0.01){
+  const d=curr-prev;
+  if(Math.abs(d)<thresh) return `<span class="flat">—</span>`;
+  const good=hiGood?d>0:d<0;
+  return `<span class="${good?'up':'dn'}">${d>0?'▲':'▼'}</span>`;
+}
+function arrRank(curr,prev){ // lower rank = better
+  const d=prev-curr;
+  if(d===0) return `<span class="flat">—</span>`;
+  return d>0?`<span class="rup">▲${d}</span>`:`<span class="rdn">▼${Math.abs(d)}</span>`;
+}
+function dlLine(curr,prev,fmt,hiGood=true,thresh=0.01){
+  const d=curr-prev;
+  if(Math.abs(d)<thresh) return `<span style="color:var(--muted);font-size:11px">vs prev: —</span>`;
+  const good=hiGood?d>0:d<0;
+  return `<span class="${good?'up':'dn'}" style="font-size:11px">${d>0?'▲':'▼'} ${fmt(Math.abs(d))} vs prev</span>`;
+}
+
+// ============================================================
+// FORMAT
+// ============================================================
+const $f=(n,d=0)=>n==null?'—':'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pf=(n,d=1)=>n.toFixed(d)+'%';
+const xf=(n,d=2)=>n.toFixed(d)+'x';
+function rb(r){const c=r===1?'mr1':r===2?'mr2':r===3?'mr3':r<=7?'mrok':'mrlo';return `<span class="mr ${c}">#${r}</span>`;}
+function cc(r){return r===1?'hl':r<=3?'gd':r<=7?'':r<=9?'am':'bd';}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+function renderLB(scored){
+  const max=scored[0].score;
+  document.getElementById('lb-tbody').innerHTML=scored.map((r,i)=>{
+    const pos=i+1, p=PREV[r.name], bw=(r.score/max*100).toFixed(1);
+    const sd=r.score-p.score, sdCls=sd>0.5?'up':sd<-0.5?'dn':'flat', sdSym=sd>0.5?'▲':sd<-0.5?'▼':'—';
+    return `<tr class="rank-${pos<=3?pos:'x'}">
+      <td><span class="rn">${pos}</span>${arrRank(pos,p.rank)}</td>
+      <td><div class="sname">${r.name}</div><div class="scity">${r.city}</div></td>
+      <td>${rb(r.rs)} ${xf(r.rplc)}${arr(r.rplc,p.rplc,true,0.05)}</td>
+      <td>${rb(r.rt)} ${pf(r.turnover)}<span class="flat" title="Prior run used estimated turnover; not directly comparable">~</span></td>
+      <td>${rb(r.rg)} ${r.rating.toFixed(1)}★${arr(r.rating,p.rating,true,0.05)}</td>
+      <td>${rb(r.ra)} ${pf(r.anc_pct)}${arr(r.anc_pct,p.anc_pct,true,0.05)}</td>
+      <td>${rb(r.rr)} ${xf(r.splr)}${arr(r.splr,p.splr,true,0.05)}</td>
+      <td>${rb(r.rsp)} ${$f(r.splseat)}${arr(r.splseat,p.splseat,true,100)}</td>
+      <td>${rb(r.rret)} ${pf(r.ret_pct,2)}${arr(r.ret_pct,p.ret_pct,false,0.02)}</td>
+      <td style="white-space:nowrap">
+        <span class="sbar"><span class="sbar-f" style="width:${bw}%"></span></span>
+        <span class="score-num">${r.score.toFixed(1)}</span>
+        <span class="${sdCls}">${sdSym}</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ============================================================
+// STORE DETAIL
+// ============================================================
+function renderSel(scored){
+  document.getElementById('store-sel').innerHTML=scored.map((r,i)=>
+    `<button class="sbtn${i===0?' active':''}" onclick="pickStore('${r.name}',this)">${r.name}</button>`
+  ).join('');
+}
+function pickStore(name,btn){
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); renderDetail(name);
+}
+function renderDetail(name){
+  const r=window._scored.find(s=>s.name===name);
+  const pos=window._scored.findIndex(s=>s.name===name)+1;
+  const n=window._scored.length, p=PREV[name];
+  document.getElementById('store-detail').innerHTML=`
+    <div class="shdr">
+      <h2>${r.name}</h2>
+      <div class="meta">${r.city} · ${r.seats} seats · ${$f(r.rent90)}/qtr rent · ${r.cluster.toUpperCase()}${r.note?` · <em>${r.note}</em>`:''}</div>
+    </div>
+    <div class="kgrid">
+      <div class="kpi ${cc(pos)}">
+        <div class="lbl">Composite Rank</div>
+        <div class="val">#${pos}<small style="font-size:13px;color:var(--muted)"> / ${n}</small></div>
+        <div class="sub">Score ${r.score.toFixed(1)} / 100</div>
+        <div class="dl">${dlLine(r.score,p.score,v=>v.toFixed(1),true,0.5)} <span style="color:var(--muted);font-size:10px">(was #${p.rank})</span></div>
+      </div>
+      <div class="kpi hl">
+        <div class="lbl">Gross Revenue (90d)</div>
+        <div class="val">${$f(r.gross)}</div>
+        <div class="sub">${r.orders.toLocaleString()} orders · Shopify live</div>
+      </div>
+      <div class="kpi ${cc(r.rs)}">
+        <div class="lbl">Staffing Efficiency</div>
+        <div class="val">${xf(r.rplc)}</div>
+        <div class="sub">Rev / Labor $ · Rank #${r.rs}</div>
+        <div class="dl">${dlLine(r.rplc,p.rplc,v=>v.toFixed(2)+'x',true,0.05)}</div>
+      </div>
+      <div class="kpi ${cc(r.rt)}">
+        <div class="lbl">Staff Turnover</div>
+        <div class="val">${pf(r.turnover)}</div>
+        <div class="sub">Annualised · Rank #${r.rt}</div>
+        <div class="dl"><span style="color:var(--muted);font-size:11px">~ methodology change vs prev</span></div>
+      </div>
+      <div class="kpi ${cc(r.rg)}">
+        <div class="lbl">Google Rating</div>
+        <div class="val">${r.rating.toFixed(1)} ★</div>
+        <div class="sub">Customer satisfaction · Rank #${r.rg}</div>
+        <div class="dl">${dlLine(r.rating,p.rating,v=>v.toFixed(1),true,0.05)}</div>
+      </div>
+      <div class="kpi ${cc(r.ra)}">
+        <div class="lbl">Ancillary %</div>
+        <div class="val">${pf(r.anc_pct)}</div>
+        <div class="sub">${$f(r.ancillary)} revenue · Rank #${r.ra}</div>
+        <div class="dl">${dlLine(r.anc_pct,p.anc_pct,v=>v.toFixed(1)+'%',true,0.05)}</div>
+      </div>
+      <div class="kpi ${cc(r.rret)}">
+        <div class="lbl">Returns Rate</div>
+        <div class="val">${pf(r.ret_pct,2)}</div>
+        <div class="sub">${$f(r.returns_amt)} returned · Rank #${r.rret}</div>
+        <div class="dl">${dlLine(r.ret_pct,p.ret_pct,v=>v.toFixed(2)+'%',false,0.02)}</div>
+      </div>
+    </div>
+    <div class="dgrid">
+      <div class="dcard"><h3>Sales Performance</h3>
+        <div class="sr"><span class="sl">Gross Revenue</span><span class="sv">${$f(r.gross)}</span></div>
+        <div class="sr"><span class="sl">Net Revenue</span><span class="sv">${$f(r.net)}</span></div>
+        <div class="sr"><span class="sl">Returns</span><span class="sv">${$f(r.returns_amt)} (${pf(r.ret_pct,2)})</span></div>
+        <div class="sr"><span class="sl">Orders</span><span class="sv">${r.orders.toLocaleString()}</span></div>
+        <div class="sr"><span class="sl">Avg Order Value</span><span class="sv">${$f(r.gross/r.orders)}</span></div>
+        <div class="sr"><span class="sl">HB Event Rev (in-store)</span><span class="sv">${r.hb_rev?$f(r.hb_rev):'—'}</span></div>
+      </div>
+      <div class="dcard"><h3>Ancillary Sales</h3>
+        <div class="sr"><span class="sl">Ancillary Revenue</span><span class="sv">${$f(r.ancillary)}</span></div>
+        <div class="sr"><span class="sl">% of Gross</span><span class="sv">${pf(r.anc_pct)} ${arr(r.anc_pct,p.anc_pct,true,0.05)} Rank #${r.ra}</span></div>
+        <div class="sr"><span class="sl">Prev run ancillary %</span><span class="sv">${pf(p.anc_pct)}</span></div>
+        <div class="sr"><span class="sl">Custom Scent Rev</span><span class="sv">${$f(r.gross-r.ancillary)}</span></div>
+      </div>
+      <div class="dcard"><h3>Space & Rent</h3>
+        <div class="sr"><span class="sl">Seats</span><span class="sv">${r.seats}</span></div>
+        <div class="sr"><span class="sl">Quarterly Rent</span><span class="sv">${$f(r.rent90)}</span></div>
+        <div class="sr"><span class="sl">Revenue / Rent $</span><span class="sv">${xf(r.splr)} ${arr(r.splr,p.splr,true,0.05)} Rank #${r.rr}</span></div>
+        <div class="sr"><span class="sl">Revenue / Seat</span><span class="sv">${$f(r.splseat)} ${arr(r.splseat,p.splseat,true,100)} Rank #${r.rsp}</span></div>
+        <div class="sr"><span class="sl">Prev Rev / Seat</span><span class="sv">${$f(p.splseat)}</span></div>
+      </div>
+      <div class="dcard"><h3>Workforce</h3>
+        <div class="sr"><span class="sl">Labor Cost (90d)</span><span class="sv">${$f(r.labor)}</span></div>
+        <div class="sr"><span class="sl">Rev / Labor $</span><span class="sv">${xf(r.rplc)} ${arr(r.rplc,p.rplc,true,0.05)} Rank #${r.rs}</span></div>
+        <div class="sr"><span class="sl">Prev Rev / Labor $</span><span class="sv">${xf(p.rplc)}</span></div>
+        <div class="sr"><span class="sl">Turnover (annualised)</span><span class="sv">${pf(r.turnover)} <span class="flat" title="Prior run used estimated figures — not directly comparable">~</span> Rank #${r.rt}</span></div>
+        <div class="sr"><span class="sl">Prev Turnover</span><span class="sv">${pf(p.turnover)}</span></div>
+        <div class="sr"><span class="sl">Google Rating</span><span class="sv">${r.rating.toFixed(1)} ★ ${arr(r.rating,p.rating,true,0.05)} Rank #${r.rg}</span></div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function showView(v,btn){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active'); btn.classList.add('active');
+}
+function initApp(){
+  const scored=computeScores();
+  window._scored=scored;
+  renderLB(scored); renderSel(scored); renderDetail(scored[0].name);
+}
+</script>
 </body>
 </html>
