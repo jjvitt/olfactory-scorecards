@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Olfactory NYC â Store Scorecards 2026</title>
+  <title>Olfactory NYC &mdash; Store Scorecards 2026</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -26,14 +26,14 @@
   <!-- Password Gate -->
   <div id="gate" style="display:flex;align-items:center;justify-content:center;min-height:100vh;">
     <div style="background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:360px;box-shadow:0 4px 24px rgba(0,0,0,0.08);text-align:center;">
-      <div style="font-size:32px;margin-bottom:8px;">ð¿</div>
+      <div style="font-size:32px;margin-bottom:8px;">&#127807;</div>
       <h1 style="font-size:18px;font-weight:600;color:#0F172A;margin-bottom:4px;">Olfactory NYC</h1>
       <p style="font-size:13px;color:#64748B;margin-bottom:28px;">Store Scorecards 2026</p>
       <input id="pw-input" type="password" placeholder="Enter password"
         style="width:100%;padding:10px 14px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:14px;outline:none;margin-bottom:10px;font-family:inherit;transition:border 0.15s;"
         onkeydown="if(event.key==='Enter')checkPw()"
         onfocus="this.style.borderColor='#6366F1'" onblur="this.style.borderColor='#CBD5E1'" />
-      <div id="pw-error" style="color:#991B1B;font-size:12px;margin-bottom:10px;display:none;">Incorrect password â please try again.</div>
+      <div id="pw-error" style="color:#991B1B;font-size:12px;margin-bottom:10px;display:none;">Incorrect password &mdash; please try again.</div>
       <button onclick="checkPw()"
         style="width:100%;padding:10px;background:#0F172A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;">
         Enter
@@ -76,7 +76,7 @@ const ANCILLARY = {
   "MIA":   { anc_net: 17716.70, anc_pct: 7.6, anc_orders: 0, py_net: 0, pct_chg: null },
 };
 
-// Google Maps ratings (sourced May 2026) â all Olfactory NYC locations
+// Google Maps ratings (sourced May 2026) &mdash; all Olfactory NYC locations
 const RATINGS = {
   "BLK":   { google: 4.9, google_count: 850,  note: null },
   "MOT":   { google: 4.8, google_count: 1528, note: null },
@@ -90,7 +90,7 @@ const RATINGS = {
   "DAL":   { google: 5.0, google_count: 81,   note: null },
 };
 
-// Event revenue (Mar 24âJun 22 2026) â in-store events only, offsites excluded
+// Event revenue (Mar 24&ndash;Jun 22 2026) &mdash; in-store events only, offsites excluded
 // Source: All Store Events Information (Google Drive), FULLY PAID + non-OFFSITE only
 const EVENT_REVENUE = {
   "BLK":  126839.00,
@@ -108,7 +108,7 @@ const EVENT_REVENUE = {
 // Seats per store (customer seating capacity)
 const SEATS = {"BLK":22,"MOT":12,"WBG":15,"BOS":17,"GEO":11,"DAL":18,"MIA":22,"ATL":20,"UNION":22,"PHL":28};
 
-// Lease data â 2026 total rent (base + additional) and square footage
+// Lease data &mdash; 2026 total rent (base + additional) and square footage
 // Sales/Rent uses per-store annualization via STORE_DAYS
 const LEASE = {
   "BLK":   { sqft: 1400, rent: 287500.00 },
@@ -137,11 +137,11 @@ const TURNOVER = {
 };
 
 
-// Labor costs from Rippling clock-in hours â each store uses its own clock-in data
+// Labor costs from Rippling clock-in hours &mdash; each store uses its own clock-in data
 // NYC_CLUSTER retained only for turnover display (shared headcount metric)
 const NYC_CLUSTER = ["BLK", "MOT", "WBG"];
 
-// Period lengths â rolling 90 days Mar 24âJun 22, 2026
+// Period lengths &mdash; rolling 90 days Mar 24&ndash;Jun 22, 2026
 const STORE_DAYS = {
   BLK:90, MOT:90, WBG:90, ATL:90, BOS:90,
   UNION:90, GEO:90, MIA:90, DAL:90, PHL:90
@@ -197,7 +197,7 @@ const ranks = {
   ret_pct: rankMetric(_raw, "ret_pct", false),  // lower returns % = better
 };
 
-// Step 3: weighted rank score â weights in priority order
+// Step 3: weighted rank score &mdash; weights in priority order
 const WEIGHTS = { rplc: 28, turn: 23, google: 14, anc: 14, splr: 9, splseat: 5, ret_pct: 7 };
 const N = stores.length;
 const enriched = _raw.map(s => {
@@ -270,7 +270,7 @@ function App() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#0F172A" }}>Store Scorecards</h1>
-          <p style={{ margin: "3px 0 0", fontSize: 13, color: "#64748B" }}>Mar 24 â Jun 22, 2026 (Last 90 Days) Â· Shopify POS + Rippling <span style={{color:"#94A3B8"}}>(all stores Mar 24 â Jun 22)</span></p>
+          <p style={{ margin: "3px 0 0", fontSize: 13, color: "#64748B" }}>Mar 24 &ndash; Jun 22, 2026 (Last 90 Days) &middot; Shopify POS + Rippling <span style={{color:"#94A3B8"}}>(all stores Mar 24 &ndash; Jun 22)</span></p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {["detail", "table"].map(v => (
@@ -359,7 +359,7 @@ function App() {
           {/* Legend */}
           <div style={{ display: "flex", gap: 16, padding: "12px 16px", borderTop: "1px solid #F1F5F9", background: "#FAFAFA" }}>
             <span style={{ fontSize: 11, color: "#64748B", fontWeight: 500 }}>Rank key:</span>
-            {[["#DCFCE7","#86EFAC","#166534","#1 â 3 Top"],["#FEF9C3","#FDE047","#854D0E","#4 â 6 Mid"],["#FEE2E2","#FCA5A5","#991B1B","#7 â 10 Bottom"]].map(([bg,bd,tx,label]) => (
+            {[["#DCFCE7","#86EFAC","#166534","#1 &ndash; 3 Top"],["#FEF9C3","#FDE047","#854D0E","#4 &ndash; 6 Mid"],["#FEE2E2","#FCA5A5","#991B1B","#7 &ndash; 10 Bottom"]].map(([bg,bd,tx,label]) => (
               <div key={label} style={{ display: "flex", alignItems: "center", gap: 5 }}>
                 <div style={{ width: 18, height: 18, borderRadius: "50%", background: bg, border: `2px solid ${bd}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span style={{ fontSize: 8, fontWeight: 700, color: tx }}>1</span>
@@ -367,7 +367,7 @@ function App() {
                 <span style={{ fontSize: 11, color: "#64748B" }}>{label}</span>
               </div>
             ))}
-            <span style={{ fontSize: 11, color: "#94A3B8", marginLeft: "auto" }}>Click any row to see full store detail â</span>
+            <span style={{ fontSize: 11, color: "#94A3B8", marginLeft: "auto" }}>Click any row to see full store detail &rarr;</span>
           </div>
         </div>
       ) : (
@@ -400,8 +400,8 @@ function App() {
                   <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: "#0F172A" }}>{store.name}</h2>
                   {store.isNYC && <span style={{ fontSize: 11, fontWeight: 600, background: "#EEF2FF", color: "#4338CA", border: "1px solid #C7D2FE", borderRadius: 5, padding: "2px 7px" }}>NYC Cluster</span>}
                 </div>
-                <p style={{ margin: 0, fontSize: 13, color: "#64748B" }}>ð {store.city}</p>
-                {store.isNYC && <p style={{ margin: "3px 0 0", fontSize: 12, color: "#94A3B8" }}>Workforce shared across Bleecker Â· Mott Â· Williamsburg (49 total)</p>}
+                <p style={{ margin: 0, fontSize: 13, color: "#64748B" }}>&#128205; {store.city}</p>
+                {store.isNYC && <p style={{ margin: "3px 0 0", fontSize: 12, color: "#94A3B8" }}>Workforce shared across Bleecker &middot; Mott &middot; Williamsburg (49 total)</p>}
               </div>
               <div style={{ textAlign: "center", background: ss.bg, border: `2px solid ${ss.border}`, borderRadius: "50%", width: 64, height: 64, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <span style={{ fontSize: 22, fontWeight: 700, color: ss.text, lineHeight: 1 }}>{store.score}</span>
@@ -415,7 +415,7 @@ function App() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
                 <KpiCard label="Gross Sales" value={fmt$(store.gross_sales)} />
                 <KpiCard label="Net Sales (Shopify)" value={fmt$(store.net_sales - store.event_rev)} highlight="#4338CA" />
-                <KpiCard label="Event Revenue" value={store.event_rev > 0 ? fmt$(store.event_rev) : "â"} sub={store.event_rev > 0 ? `${((store.event_rev/store.net_sales)*100).toFixed(1)}% of total` : "no events"} highlight={store.event_rev > 0 ? "#166534" : "#94A3B8"} />
+                <KpiCard label="Event Revenue" value={store.event_rev > 0 ? fmt$(store.event_rev) : "&mdash;"} sub={store.event_rev > 0 ? `${((store.event_rev/store.net_sales)*100).toFixed(1)}% of total` : "no events"} highlight={store.event_rev > 0 ? "#166534" : "#94A3B8"} />
                 <KpiCard label="Combined Net Sales" value={fmt$(store.net_sales)} highlight="#0F172A" />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginTop: 10 }}>
@@ -444,11 +444,11 @@ function App() {
               const rentColor = splr >= 10 ? "#166534" : splr >= 7 ? "#854D0E" : "#991B1B";
               return (
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Space &amp; Rent <span style={{ fontWeight: 400, fontSize: 10, textTransform: "none" }}>(annualized â Last 91 days, PHL QTD 41 days)</span></div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Space &amp; Rent <span style={{ fontWeight: 400, fontSize: 10, textTransform: "none" }}>(annualized &mdash; Last 91 days, PHL QTD 41 days)</span></div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Seats" value={SEATS[store.code] || "â"} sub="customer seating" />
+                    <KpiCard label="Seats" value={SEATS[store.code] || "&mdash;"} sub="customer seating" />
                     <KpiCard label="Total Annual Rent" value={fmt$(l.rent)} sub="base + additional" />
-                    <KpiCard label="Sales / Seat" value={splseat ? fmt$(splseat) : "â"} sub="annualized" highlight={seatColor} rank={store.ranks.splseat} />
+                    <KpiCard label="Sales / Seat" value={splseat ? fmt$(splseat) : "&mdash;"} sub="annualized" highlight={seatColor} rank={store.ranks.splseat} />
                     <KpiCard label="Sales / Rent $" value={`$${splr.toFixed(2)}`} sub="per $1 of rent" highlight={rentColor} rank={store.ranks.splr} />
                   </div>
                   {/* Comparison bars */}
@@ -526,13 +526,13 @@ function App() {
                   <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Ancillary Sales (Upsell)</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
                     <KpiCard label="Anc. % of Sales" value={fmtPct(anc.anc_pct)} sub="key upsell metric" highlight={ancColor} rank={store.ranks.anc} />
-                    <KpiCard label="vs Prior Year" value={anc.pct_chg != null ? `${anc.pct_chg > 0 ? "+" : ""}${anc.pct_chg.toFixed(0)}%` : "N/A"} sub={anc.py_net ? `anc.py_net was $${Math.round(anc.py_net).toLocaleString()}` : "new location"} highlight={anc.pct_chg > 0 ? "#166534" : anc.pct_chg < 0 ? "#991B1B" : undefined} />
+                    <KpiCard label="vs Prior Year" value={anc.pct_chg != null ? `${anc.pct_chg > 0 ? "+" : ""}${anc.pct_chg.toFixed(0)}%` : "N/A"} sub={anc.py_net ? `was $${Math.round(anc.py_net).toLocaleString()}` : "new location"} highlight={anc.pct_chg > 0 ? "#166534" : anc.pct_chg < 0 ? "#991B1B" : undefined} />
                     <KpiCard label="Anc. Net Sales" value={fmt$(anc.anc_net)} />
                     <KpiCard label="Anc. Orders" value={anc.anc_orders.toLocaleString()} />
                   </div>
                   {/* Ancillary % bar chart across all stores */}
                   <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Ancillary % of Sales â All Stores</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Ancillary % of Sales &mdash; All Stores</div>
                     {Object.entries(ANCILLARY)
                       .sort((a, b) => b[1].anc_pct - a[1].anc_pct)
                       .map(([code, a]) => {
@@ -543,7 +543,7 @@ function App() {
                             <div style={{ width: 120, fontSize: 12, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{s2?.name || code}</div>
                             <MiniBar pct={(a.anc_pct / maxAncPct) * 100} color={isActive ? "#6366F1" : "#CBD5E1"} />
                             <div style={{ width: 44, fontSize: 12, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>{fmtPct(a.anc_pct)}</div>
-                            <div style={{ width: 50, fontSize: 11, color: a.pct_chg > 0 ? "#166534" : "#991B1B", flexShrink: 0 }}>{a.pct_chg != null ? (a.pct_chg > 0 ? "â²" : "â¼") + Math.abs(a.pct_chg).toFixed(0) + "%" : "â"}</div>
+                            <div style={{ width: 50, fontSize: 11, color: a.pct_chg > 0 ? "#166534" : "#991B1B", flexShrink: 0 }}>{a.pct_chg != null ? (a.pct_chg > 0 ? "&#9650;" : "&#9660;") + Math.abs(a.pct_chg).toFixed(0) + "%" : "&mdash;"}</div>
                           </div>
                         );
                     })}
@@ -559,7 +559,7 @@ function App() {
                 <div key={s.code} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
                   <div style={{ width: 120, fontSize: 12, color: s.code === selected ? "#4338CA" : "#475569", fontWeight: s.code === selected ? 600 : 400, flexShrink: 0, textAlign: "right", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={s.name}>{s.name}</div>
                   <MiniBar pct={(s.net_sales / allNetMax) * 100} color={s.code === selected ? "#6366F1" : "#CBD5E1"} />
-                  <div style={{ width: 64, fontSize: 12, color: "#64748B", flexShrink: 0 }}>{fmtK(snet_sales)}</div>
+                  <div style={{ width: 64, fontSize: 12, color: "#64748B", flexShrink: 0 }}>{fmtK(s.net_sales)}</div>
                 </div>
               ))}
             </div>
@@ -569,7 +569,7 @@ function App() {
               const r = RATINGS[store.code];
               if (!r) return null;
               const starColor = r.google >= 4.5 ? "#166534" : r.google >= 4.0 ? "#854D0E" : r.google ? "#991B1B" : "#94A3B8";
-              const stars = r.google ? "â".repeat(Math.round(r.google)) + "â".repeat(5 - Math.round(r.google)) : null;
+              const stars = r.google ? "&#9733;".repeat(Math.round(r.google)) + "&#9734;".repeat(5 - Math.round(r.google)) : null;
               const maxRating = 5;
               return (
                 <div>
@@ -577,22 +577,22 @@ function App() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 12 }}>
                     <KpiCard
                       label="Google Rating"
-                      value={r.google ? `${r.google.toFixed(1)} â` : "â"}
+                      value={r.google ? `${r.google.toFixed(1)} &#9733;` : "&mdash;"}
                       sub={r.google ? `${r.google_count} reviews` : r.note}
                       highlight={starColor}
                       rank={store.ranks.google}
                     />
-                    <KpiCard label="Yelp Rating" value="â" sub="Not connected" />
-                    <KpiCard label="Review Count" value={r.google_count || "â"} sub={r.note || "Google Maps"} />
+                    <KpiCard label="Yelp Rating" value="&mdash;" sub="Not connected" />
+                    <KpiCard label="Review Count" value={r.google_count || "&mdash;"} sub={r.note || "Google Maps"} />
                   </div>
                   {r.note && (
                     <div style={{ fontSize: 12, color: "#854D0E", background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 8, padding: "8px 12px", marginBottom: 8 }}>
-                       â  {r.note} â confirm this matches your store location
+                      &#9888; {r.note} &mdash; confirm this matches your store location
                     </div>
                   )}
                   {/* Rating comparison bar chart */}
                   <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Google Rating â All Stores</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Google Rating &mdash; All Stores</div>
                     {Object.entries(RATINGS)
                       .filter(([, v]) => v.google !== null)
                       .sort((a, b) => b[1].google - a[1].google)
@@ -607,7 +607,7 @@ function App() {
                             <MiniBar pct={(rat.google / maxRating) * 100} color={isActive ? activeClr : barClr} />
                             <div style={{ width: 32, fontSize: 12, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>{rat.google.toFixed(1)}</div>
                             <div style={{ width: 55, fontSize: 11, color: "#94A3B8", flexShrink: 0 }}>({rat.google_count})</div>
-                            {rat.note && <span style={{ fontSize: 10, color: "#D97706" }}>â </span>}
+                            {rat.note && <span style={{ fontSize: 10, color: "#D97706" }}>&#9888;</span>}
                           </div>
                         );
                     })}
@@ -631,13 +631,13 @@ function App() {
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Turnover (Last 6 Months)</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="Ã2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} />
+                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="&times;2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} />
                     <KpiCard label="6-Month Rate" value={fmtPct(tv.rate6m)} sub={`${tv.terminated} terminated`} />
                     <KpiCard label="Voluntary" value={tv.voluntary} sub={`${tv.terminated > 0 ? Math.round(tv.voluntary/tv.terminated*100) : 0}% of exits`} />
                     <KpiCard label="Involuntary" value={tv.involuntary} sub={`${tv.terminated > 0 ? Math.round(tv.involuntary/tv.terminated*100) : 0}% of exits`} highlight={tv.involuntary > 2 ? "#991B1B" : undefined} />
                   </div>
                   <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
-                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Annualized Turnover â All Stores</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 12 }}>Annualized Turnover &mdash; All Stores</div>
                     {tvEntries
                       .sort((a, b) => b[1].rateAnnual - a[1].rateAnnual)
                       .map(([code, t]) => {
@@ -664,16 +664,16 @@ function App() {
             {(() => {
               const tv = TURNOVER[store.code];
               const flags = [];
-              if (store.lcp > 30) flags.push(`Labor cost % of ${fmtPct(store.lcp)} is elevated â review scheduling`);
-              if (store.disc_pct > 18) flags.push(`Discount rate of ${fmtPct(store.disc_pct)} is high â review promotional activity`);
-              if (tv && tv.rateAnnual >= 40) flags.push(`Annualized turnover of ${fmtPct(tv.rateAnnual)} is critical â urgent retention action needed`);
+              if (store.lcp > 30) flags.push(`Labor cost % of ${fmtPct(store.lcp)} is elevated &mdash; review scheduling`);
+              if (store.disc_pct > 18) flags.push(`Discount rate of ${fmtPct(store.disc_pct)} is high &mdash; review promotional activity`);
+              if (tv && tv.rateAnnual >= 40) flags.push(`Annualized turnover of ${fmtPct(tv.rateAnnual)} is critical &mdash; urgent retention action needed`);
               else if (tv && tv.rateAnnual >= 25) flags.push(`Annualized turnover of ${fmtPct(tv.rateAnnual)} is above healthy range`);
-              if (tv && tv.involuntary >= 2) flags.push(`${tv.involuntary} involuntary terminations in 6 months â review management practices`);
+              if (tv && tv.involuntary >= 2) flags.push(`${tv.involuntary} involuntary terminations in 6 months &mdash; review management practices`);
               if (!flags.length) return null;
               return (
                 <div style={{ background: "#FFF7ED", border: "1px solid #FED7AA", borderRadius: 12, padding: "14px 18px" }}>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#9A3412", marginBottom: 8 }}>â  Flags</div>
-                  {flags.map((f, i) => <div key={i} style={{ fontSize: 13, color: "#9A3412", marginBottom: i < flags.length-1 ? 4 : 0 }}>â¢ {f}</div>)}
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "#9A3412", marginBottom: 8 }}>&#9888; Flags</div>
+                  {flags.map((f, i) => <div key={i} style={{ fontSize: 13, color: "#9A3412", marginBottom: i < flags.length-1 ? 4 : 0 }}>&bull; {f}</div>)}
                 </div>
               );
             })()}
