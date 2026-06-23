@@ -124,9 +124,9 @@ const LEASE = {
 };
 
 const TURNOVER = {
-  "BLK":   { headcount:31, terminated:5, involuntary:0, voluntary:5, rate6m:16.1, rateAnnual:32.3, isNYC:false },
-  "MOT":   { headcount:16, terminated:3, involuntary:0, voluntary:3, rate6m:18.8, rateAnnual:37.5, isNYC:false },
-  "WBG":   { headcount:12, terminated:2, involuntary:0, voluntary:2, rate6m:16.7, rateAnnual:33.3, isNYC:false },
+  "BLK":   { headcount:32, terminated:7, involuntary:0, voluntary:7, rate6m:21.9, rateAnnual:43.8, isNYC:false },
+  "MOT":   { headcount:18, terminated:8, involuntary:0, voluntary:8, rate6m:44.4, rateAnnual:88.8, isNYC:false },
+  "WBG":   { headcount:8,  terminated:3, involuntary:0, voluntary:3, rate6m:37.5, rateAnnual:75.0, isNYC:false },
   "PHL":   { headcount:18, terminated:4, involuntary:2, voluntary:2, rate6m:22.2, rateAnnual:44.4, isNYC:false },
   "ATL":   { headcount:29, terminated:3, involuntary:1, voluntary:2, rate6m:10.3, rateAnnual:20.7, isNYC:false },
   "BOS":   { headcount:32, terminated:0, involuntary:0, voluntary:0, rate6m:0.0,  rateAnnual:0.0,  isNYC:false },
@@ -336,7 +336,7 @@ function App() {
                       const rank = s.ranks[key];
                       const bg   = rank <= 3 ? "#DCFCE7" : rank <= 6 ? "#FEF9C3" : "#FEE2E2";
                       const text = rank <= 3 ? "#166534" : rank <= 6 ? "#854D0E" : "#991B1B";
-                      const border = rank <= 3 ? "#86EFAC" : rank <= 6 ? "#FDE047" : "#FCA5A5";
+                      const border = rank <= 3 ? "#86EFAC" : rank <= 6 ? "#FDD147" : "#FCA5A5";
                       return (
                         <td key={key} style={{ padding: "14px 20px", textAlign: "center" }}>
                           <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: "50%", background: bg, border: `2px solid ${border}`, color: text, fontSize: 15, fontWeight: 700 }}>
@@ -631,7 +631,7 @@ function App() {
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Turnover (Last 6 Months)</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="&times;2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} />
+                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="&#215;2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} />
                     <KpiCard label="6-Month Rate" value={fmtPct(tv.rate6m)} sub={`${tv.terminated} terminated`} />
                     <KpiCard label="Voluntary" value={tv.voluntary} sub={`${tv.terminated > 0 ? Math.round(tv.voluntary/tv.terminated*100) : 0}% of exits`} />
                     <KpiCard label="Involuntary" value={tv.involuntary} sub={`${tv.terminated > 0 ? Math.round(tv.involuntary/tv.terminated*100) : 0}% of exits`} highlight={tv.involuntary > 2 ? "#991B1B" : undefined} />
@@ -691,4 +691,4 @@ function App() {
     if (window._appReady) { window.initApp(); }
   </script>
 </body>
-</html
+</html>
