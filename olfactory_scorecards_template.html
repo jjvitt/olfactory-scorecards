@@ -125,7 +125,7 @@ const LEASE = {
 
 const TURNOVER = {
   "BLK":   { headcount:32, terminated:7, involuntary:0, voluntary:7, rate6m:21.9, rateAnnual:43.8, isNYC:false },
-  "MOT":   { headcount:18, terminated:8, involuntary:0, voluntary:8, rate6m:44.4, rateAnnual:88.8, isNYC:false },
+  "MOT":   { headcount:18, terminated:7, involuntary:0, voluntary:7, rate6m:38.9, rateAnnual:77.8, isNYC:false },
   "WBG":   { headcount:8,  terminated:3, involuntary:0, voluntary:3, rate6m:37.5, rateAnnual:75.0, isNYC:false },
   "PHL":   { headcount:18, terminated:4, involuntary:2, voluntary:2, rate6m:22.2, rateAnnual:44.4, isNYC:false },
   "ATL":   { headcount:29, terminated:3, involuntary:1, voluntary:2, rate6m:10.3, rateAnnual:20.7, isNYC:false },
@@ -336,7 +336,7 @@ function App() {
                       const rank = s.ranks[key];
                       const bg   = rank <= 3 ? "#DCFCE7" : rank <= 6 ? "#FEF9C3" : "#FEE2E2";
                       const text = rank <= 3 ? "#166534" : rank <= 6 ? "#854D0E" : "#991B1B";
-                      const border = rank <= 3 ? "#86EFAC" : rank <= 6 ? "#FDD147" : "#FCA5A5";
+                      const border = rank <= 3 ? "#86EFAC" : rank <= 6 ? "#FDE047" : "#FCA5A5";
                       return (
                         <td key={key} style={{ padding: "14px 20px", textAlign: "center" }}>
                           <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: "50%", background: bg, border: `2px solid ${border}`, color: text, fontSize: 15, fontWeight: 700 }}>
@@ -489,7 +489,7 @@ function App() {
                             <div key={code} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 7 }}>
                               <div style={{ width: 90, fontSize: 11, color: isActive ? "#4338CA" : "#475569", fontWeight: isActive ? 600 : 400, flexShrink: 0, textAlign: "right", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s2.name}</div>
                               <MiniBar pct={(val / maxSplr) * 100} color={isActive ? "#6366F1" : "#CBD5E1"} />
-                              <div style={{ width: 40, fontSize: 11, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>${val.toFixed(2)}</div>
+                              <div style={{ width: 40, fontSize: 11, color: isActive ? "#4338CA" : "#64748B", fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>$${val.toFixed(2)}</div>
                             </div>
                           );
                         })}
@@ -507,7 +507,7 @@ function App() {
                 <KpiCard label="Hours Worked" value={store.hours.toLocaleString()} sub="this period" />
                 <KpiCard label="Labor Cost" value={fmt$(store.labor_cost)} />
                 <KpiCard label="Labor Cost %" value={fmtPct(store.lcp)} highlight={lcpStyle(store.lcp)} />
-                <KpiCard label="Rev / Labor $" value={`$${store.rplc.toFixed(2)}`} sub="per $1 of labor cost" highlight={store.rplc >= 4.5 ? "#166534" : store.rplc >= 3.5 ? "#854D0E" : "#991B1B"} rank={store.ranks.rplc} />
+                <KpiCard label="Rev / Labor dollar" value={`$${store.rplc.toFixed(2)}`} sub="per $1 of labor cost" highlight={store.rplc >= 4.5 ? "#166534" : store.rplc >= 3.5 ? "#854D0E" : "#991B1B"} rank={store.ranks.rplc} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginTop: 10 }}>
                 <KpiCard label="Sales / Labor Hour" value={`$${store.splh.toFixed(2)}`} sub="net sales per hour worked" highlight={store.splh >= 100 ? "#166534" : store.splh >= 85 ? "#854D0E" : "#991B1B"} />
