@@ -240,7 +240,36 @@ const prevEnriched = computeEnriched(PREV_STORES, PREV_ANCILLARY);
 
 // Build prev lookup: code → { score, leaderboardPos, ranks }
 const prevByCode = {};
-prevEnriched.forEach((s, i) => { prevByCode[s.code] = { score: s.score, leaderboardPos: i + 1, ranks: s.ranks }; });
+prevEnriched.forEach((s, i) => { prevByCode[s.code] = { score: s.score, leaderboardPos: i + 1, ranks: s.ranks, rplc: s.rplc, anc: s.anc, splr: s.splr, splseat: s.splseat, ret_pct: s.ret_pct, turn: s.turn, google: s.google, net_sales: s.net_sales }; });
+
+// Value-delta formatter: returns { delta: formattedString, deltaGood: bool }
+function fmtValDelta(curr, prev, format, higherBetter) {
+  if (prev == null) return {};
+  const d = curr - prev;
+  if (format === "$2"   && Math.abs(d) < 0.005) return {};
+  if (format === "pct1" && Math.abs(d) < 0.05)  return {};
+  if (format === "pct2" && Math.abs(d) < 0.005) return {};
+  if (format === "$K"   && Math.abs(d) < 500)    return {};
+  if (format === "f1"   && Math.abs(d) < 0.05)   return {};
+  const sign = d > 0 ? "+" : "";
+  let str;
+  if (format === "$2")   str = sign + "$" + d.toFixed(2);
+  if (format === "pct1") str = sign + d.toFixed(1) + "%";
+  if (format === "pct2") str = sign + d.toFixed(2) + "%";
+  if (format === "$K")   str = sign + "$" + (d / 1000).toFixed(1) + "K";
+  if (format === "f1")   str = sign + d.toFixed(1);
+  return { delta: str, deltaGood: higherBetter ? d > 0 : d < 0 };
+}
+// Per-metric delta config for leaderboard table
+const RANK_KEY_DELTA = {
+  rplc:    (s, p) => fmtValDelta(s.rplc,    p?.rplc,    "$2",   true),
+  turn:    (s, p) => fmtValDelta(s.turn,    p?.turn,    "pct1", false),
+  google:  (s, p) => fmtValDelta(s.google,  p?.google,  "f1",   true),
+  anc:     (s, p) => fmtValDelta(s.anc,     p?.anc,     "pct1", true),
+  splr:    (s, p) => fmtValDelta(s.splr,    p?.splr,    "$2",   true),
+  splseat: (s, p) => fmtValDelta(s.splseat, p?.splseat, "$K",   true),
+  ret_pct: (s, p) => fmtValDelta(s.ret_pct, p?.ret_pct, "pct2", false),
+};
 
 const fmt$ = v => "$" + Math.round(v).toLocaleString();
 const fmtK = v => "$" + (v / 1000).toFixed(1) + "K";
@@ -278,7 +307,7 @@ function RankDelta({ delta }) {
   );
 }
 
-function KpiCard({ label, value, sub, highlight, rank, rankDelta }) {
+function KpiCard({ label, value, sub, highlight, rank, delta, deltaGood }) {
   return (
     <div style={{ background: "#F8FAFC", borderRadius: 10, padding: "14px 16px", border: "1px solid #E2E8F0" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
@@ -286,7 +315,9 @@ function KpiCard({ label, value, sub, highlight, rank, rankDelta }) {
         {rank != null && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
             <RankBadge rank={rank} />
-            <RankDelta delta={rankDelta} />
+            {delta
+              ? <span style={{ fontSize: 9, fontWeight: 700, color: deltaGood ? "#166534" : "#991B1B", lineHeight: 1 }}>{delta}</span>
+              : <span style={{ fontSize: 9, color: "#94A3B8", lineHeight: 1 }}>—</span>}
           </div>
         )}
       </div>
@@ -308,6 +339,7 @@ function App() {
   const [selected, setSelected] = useState(enriched[0].code);
   const [view, setView] = useState("detail"); // "detail" | "table"
   const store = enriched.find(s => s.code === selected);
+  const pStore = prevByCode[store.code];
   const ss = scoreStyle(store.score);
   const allNetMax = Math.max(...enriched.map(s => s.net_sales));
 
@@ -373,7 +405,7 @@ function App() {
                           <div style={{ width: 24, height: 24, borderRadius: "50%", background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#64748B", flexShrink: 0 }}>
                             {i + 1}
                           </div>
-                          <RankDelta delta={(i + 1) - (prevByCode[s.code]?.leaderboardPos ?? (i + 1))} />
+                          {(() => { const sd = s.score - (prevByCode[s.code]?.score ?? s.score); return sd !== 0 ? <span style={{ fontSize: 9, fontWeight: 700, color: sd > 0 ? "#166534" : "#991B1B" }}>{sd > 0 ? `+${sd}` : sd}</span> : <span style={{ fontSize: 9, color: "#94A3B8" }}>—</span>; })()}
                         </div>
                         <div>
                           <div style={{ fontWeight: 500, color: "#0F172A", fontSize: 13 }}>{s.name}</div>
@@ -387,13 +419,17 @@ function App() {
                       const bg   = rank <= 3 ? "#DCFCE7" : rank <= 6 ? "#FEF9C3" : "#FEE2E2";
                       const text = rank <= 3 ? "#166534" : rank <= 6 ? "#854D0E" : "#991B1B";
                       const border = rank <= 3 ? "#86EFAC" : rank <= 6 ? "#FDE047" : "#FCA5A5";
+                      const pv = prevByCode[s.code];
+                      const { delta: vd, deltaGood: vg } = RANK_KEY_DELTA[key] ? RANK_KEY_DELTA[key](s, pv) : {};
                       return (
                         <td key={key} style={{ padding: "14px 20px", textAlign: "center" }}>
                           <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                             <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: "50%", background: bg, border: `2px solid ${border}`, color: text, fontSize: 15, fontWeight: 700 }}>
                               {rank}
                             </div>
-                            <RankDelta delta={rank - (prevByCode[s.code]?.ranks[key] ?? rank)} />
+                            {vd
+                              ? <span style={{ fontSize: 9, fontWeight: 700, color: vg ? "#166534" : "#991B1B" }}>{vd}</span>
+                              : <span style={{ fontSize: 9, color: "#94A3B8" }}>—</span>}
                           </div>
                         </td>
                       );
@@ -436,7 +472,6 @@ function App() {
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ fontSize: 12, color: "#94A3B8" }}>#{i + 1}</span>
-                      <RankDelta delta={(i + 1) - (prevByCode[s.code]?.leaderboardPos ?? (i + 1))} />
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                       <span style={{ background: ss2.bg, color: ss2.text, borderRadius: 5, padding: "1px 7px", fontSize: 11, fontWeight: 600 }}>{s.score}</span>
@@ -444,7 +479,10 @@ function App() {
                     </div>
                   </div>
                   <div style={{ fontSize: 13, fontWeight: 500, color: active ? "#4338CA" : "#0F172A", lineHeight: 1.3 }}>{s.name}</div>
-                  <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}>{fmtK(s.net_sales)} net sales</div>
+                  <div style={{ fontSize: 11, color: "#94A3B8", marginTop: 2 }}>
+                    {fmtK(s.net_sales)} net sales
+                    {(() => { const d = s.net_sales - (prevByCode[s.code]?.net_sales ?? s.net_sales); if (Math.abs(d) < 500) return null; return <span style={{ marginLeft: 4, fontWeight: 600, color: d > 0 ? "#166534" : "#991B1B" }}>{d > 0 ? "+" : ""}{fmtK(d)}</span>; })()}
+                  </div>
                 </button>
               );
             })}
@@ -510,8 +548,8 @@ function App() {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
                     <KpiCard label="Seats" value={SEATS[store.code] || "—"} sub="customer seating" />
                     <KpiCard label="Total Annual Rent" value={fmt$(l.rent)} sub="base + additional" />
-                    <KpiCard label="Sales / Seat" value={splseat ? fmt$(splseat) : "—"} sub="annualized" highlight={seatColor} rank={store.ranks.splseat} rankDelta={store.ranks.splseat - (prevByCode[store.code]?.ranks.splseat ?? store.ranks.splseat)} />
-                    <KpiCard label="Sales / Rent $" value={`$${splr.toFixed(2)}`} sub="per $1 of rent" highlight={rentColor} rank={store.ranks.splr} rankDelta={store.ranks.splr - (prevByCode[store.code]?.ranks.splr ?? store.ranks.splr)} />
+                    <KpiCard label="Sales / Seat" value={splseat ? fmt$(splseat) : "—"} sub="annualized" highlight={seatColor} rank={store.ranks.splseat} {...fmtValDelta(store.splseat, pStore?.splseat, "$K", true)} />
+                    <KpiCard label="Sales / Rent $" value={`$${splr.toFixed(2)}`} sub="per $1 of rent" highlight={rentColor} rank={store.ranks.splr} {...fmtValDelta(store.splr, pStore?.splr, "$2", true)} />
                   </div>
                   {/* Comparison bars */}
                   <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #E2E8F0", padding: "14px 18px" }}>
@@ -569,7 +607,7 @@ function App() {
                 <KpiCard label="Hours Worked" value={store.hours.toLocaleString()} sub="this period" />
                 <KpiCard label="Labor Cost" value={fmt$(store.labor_cost)} />
                 <KpiCard label="Labor Cost %" value={fmtPct(store.lcp)} highlight={lcpStyle(store.lcp)} />
-                <KpiCard label="Rev / Labor $" value={`$${store.rplc.toFixed(2)}`} sub="per $1 of labor cost" highlight={store.rplc >= 4.5 ? "#166534" : store.rplc >= 3.5 ? "#854D0E" : "#991B1B"} rank={store.ranks.rplc} rankDelta={store.ranks.rplc - (prevByCode[store.code]?.ranks.rplc ?? store.ranks.rplc)} />
+                <KpiCard label="Rev / Labor $" value={`$${store.rplc.toFixed(2)}`} sub="per $1 of labor cost" highlight={store.rplc >= 4.5 ? "#166534" : store.rplc >= 3.5 ? "#854D0E" : "#991B1B"} rank={store.ranks.rplc} {...fmtValDelta(store.rplc, pStore?.rplc, "$2", true)} />
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginTop: 10 }}>
                 <KpiCard label="Sales / Labor Hour" value={`$${store.splh.toFixed(2)}`} sub="net sales per hour worked" highlight={store.splh >= 100 ? "#166534" : store.splh >= 85 ? "#854D0E" : "#991B1B"} />
@@ -587,7 +625,7 @@ function App() {
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Ancillary Sales (Upsell)</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Anc. % of Sales" value={fmtPct(anc.anc_pct)} sub="key upsell metric" highlight={ancColor} rank={store.ranks.anc} rankDelta={store.ranks.anc - (prevByCode[store.code]?.ranks.anc ?? store.ranks.anc)} />
+                    <KpiCard label="Anc. % of Sales" value={fmtPct(anc.anc_pct)} sub="key upsell metric" highlight={ancColor} rank={store.ranks.anc} {...fmtValDelta(store.anc, pStore?.anc, "pct1", true)} />
                     <KpiCard label="vs Prior Year" value={anc.pct_chg != null ? `${anc.pct_chg > 0 ? "+" : ""}${anc.pct_chg.toFixed(0)}%` : "N/A"} sub={anc.py_net ? `was $${Math.round(anc.py_net).toLocaleString()}` : "new location"} highlight={anc.pct_chg > 0 ? "#166534" : anc.pct_chg < 0 ? "#991B1B" : undefined} />
                     <KpiCard label="Anc. Net Sales" value={fmt$(anc.anc_net)} />
                     <KpiCard label="Anc. Orders" value={anc.anc_orders.toLocaleString()} />
@@ -643,7 +681,7 @@ function App() {
                       sub={r.google ? `${r.google_count} reviews` : r.note}
                       highlight={starColor}
                       rank={store.ranks.google}
-                      rankDelta={store.ranks.google - (prevByCode[store.code]?.ranks.google ?? store.ranks.google)}
+                      {...fmtValDelta(store.google, pStore?.google, "f1", true)}
                     />
                     <KpiCard label="Yelp Rating" value="—" sub="Not connected" />
                     <KpiCard label="Review Count" value={r.google_count || "—"} sub={r.note || "Google Maps"} />
@@ -694,7 +732,7 @@ function App() {
                 <div>
                   <div style={{ fontSize: 11, fontWeight: 600, color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Turnover (Last 6 Months)</div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 12 }}>
-                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="×2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} rankDelta={store.ranks.turn - (prevByCode[store.code]?.ranks.turn ?? store.ranks.turn)} />
+                    <KpiCard label="Annualized Rate" value={fmtPct(tv.rateAnnual)} sub="×2 of 6-month rate" highlight={turnColor} rank={store.ranks.turn} {...fmtValDelta(store.turn, pStore?.turn, "pct1", false)} />
                     <KpiCard label="6-Month Rate" value={fmtPct(tv.rate6m)} sub={`${tv.terminated} terminated`} />
                     <KpiCard label="Voluntary" value={tv.voluntary} sub={`${tv.terminated > 0 ? Math.round(tv.voluntary/tv.terminated*100) : 0}% of exits`} />
                     <KpiCard label="Involuntary" value={tv.involuntary} sub={`${tv.terminated > 0 ? Math.round(tv.involuntary/tv.terminated*100) : 0}% of exits`} highlight={tv.involuntary > 2 ? "#991B1B" : undefined} />
