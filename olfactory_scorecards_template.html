@@ -198,7 +198,7 @@ function rankMetric(arr, key, higherIsBetter) {
 }
 
 // weighted rank score — weights in priority order
-const WEIGHTS = { rplc: 28, turn: 23, google: 14, anc: 14, splr: 9, splseat: 5, ret_pct: 7 };
+const WEIGHTS = { rplc: 28, turn: 23, google: 14, anc: 14, splr: 0, splseat: 5, ret_pct: 7 };
 
 function computeEnriched(storesData, ancData) {
   const rawData = storesData.map(s => {
