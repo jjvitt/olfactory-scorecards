@@ -64,16 +64,16 @@
     const { useState } = React;
 
 const ANCILLARY = {
-  "BLK":   { anc_net: 64034.16, anc_pct: 9.04,  anc_orders: 0, py_net: 0, pct_chg: null },
-  "MOT":   { anc_net: 37980.92, anc_pct: 8.90,  anc_orders: 0, py_net: 0, pct_chg: null },
-  "WBG":   { anc_net: 25189.75, anc_pct: 10.68, anc_orders: 0, py_net: 0, pct_chg: null },
-  "ATL":   { anc_net: 53978.18, anc_pct: 12.00, anc_orders: 0, py_net: 0, pct_chg: null },
-  "BOS":   { anc_net: 29738.22, anc_pct: 8.90,  anc_orders: 0, py_net: 0, pct_chg: null },
-  "UNION": { anc_net: 37383.08, anc_pct: 10.63, anc_orders: 0, py_net: 0, pct_chg: null },
-  "GEO":   { anc_net: 36836.50, anc_pct: 10.42, anc_orders: 0, py_net: 0, pct_chg: null },
-  "PHL":   { anc_net: 34331.88, anc_pct: 9.16,  anc_orders: 0, py_net: 0, pct_chg: null },
-  "DAL":   { anc_net: 21032.79, anc_pct: 9.94,  anc_orders: 0, py_net: 0, pct_chg: null },
-  "MIA":   { anc_net: 16095.34, anc_pct: 7.85,  anc_orders: 0, py_net: 0, pct_chg: null },
+  "BLK":   { anc_net: 60272.58, anc_pct: 8.97 },
+  "MOT":   { anc_net: 40056.42, anc_pct: 8.68 },
+  "WBG":   { anc_net: 19870.36, anc_pct: 9.15 },
+  "ATL":   { anc_net: 46324.28, anc_pct: 11.10 },
+  "BOS":   { anc_net: 29092.64, anc_pct: 8.91 },
+  "UNION": { anc_net: 34471.48, anc_pct: 10.11 },
+  "GEO":   { anc_net: 33719.61, anc_pct: 10.27 },
+  "PHL":   { anc_net: 33506.79, anc_pct: 10.05 },
+  "DAL":   { anc_net: 20797.27, anc_pct: 10.07 },
+  "MIA":   { anc_net: 12530.63, anc_pct: 6.71 },
 };
 
 // Google Maps ratings (sourced May 2026) — all Olfactory NYC locations
@@ -141,7 +141,7 @@ const TURNOVER = {
 // NYC_CLUSTER retained only for turnover display (shared headcount metric)
 const NYC_CLUSTER = ["BLK", "MOT", "WBG"];
 
-// Period lengths — rolling 90 days Apr 21–Jul 20, 2026
+// Period lengths — rolling 90 days Jul 15–Oct 13, 2026
 const STORE_DAYS = {
   BLK:90, MOT:90, WBG:90, ATL:90, BOS:90,
   UNION:90, GEO:90, MIA:90, DAL:90, PHL:90
@@ -149,42 +149,42 @@ const STORE_DAYS = {
 const ANNUALIZATION = 365 / 90; // rolling 90-day window; per-store: 365/STORE_DAYS[code]
 
 const stores = [
-  { name: "Bleecker Street",      code: "BLK",   city: "New York, NY",       gross_sales: 708350.00,  net_sales: 571345.56,  discounts: -134721.60, returns: -2282.84,  labor_cost: 87479.58, hours: 4271.91, headcount: 42, event_rev: 127926.00 },
-  { name: "Atlanta Ponce Market", code: "ATL",   city: "Atlanta, GA",        gross_sales: 449890.00,  net_sales: 401199.23,  discounts: -47581.50,  returns: -1109.27,  labor_cost: 68246.65, hours: 3394.42, headcount: 19, event_rev: 22467.00  },
-  { name: "281 Mott Street",      code: "MOT",   city: "New York, NY",       gross_sales: 426745.00,  net_sales: 366362.50,  discounts: -59733.90,  returns: -648.60,   labor_cost: 42796.07, hours: 2178.89, headcount: 28, event_rev: 112707.00 },
-  { name: "Union Market",         code: "UNION", city: "Washington, DC",     gross_sales: 351835.00,  net_sales: 293390.65,  discounts: -56701.05,  returns: -1743.30,  labor_cost: 43341.12, hours: 2191.55, headcount: 17, event_rev: 12770.00  },
-  { name: "Boston Newbury",       code: "BOS",   city: "Boston, MA",         gross_sales: 334230.00,  net_sales: 284696.77,  discounts: -48501.50,  returns: -1031.73,  labor_cost: 51369.76, hours: 2294.35, headcount: 13, event_rev: 40191.00  },
-  { name: "Georgetown",           code: "GEO",   city: "Washington, DC",     gross_sales: 353528.00,  net_sales: 310621.40,  discounts: -42696.75,  returns: -209.85,   labor_cost: 52683.83, hours: 2205.07, headcount: 9,  event_rev: 33325.00  },
-  { name: "Williamsburg",         code: "WBG",   city: "Brooklyn, NY",       gross_sales: 235915.00,  net_sales: 204142.46,  discounts: -31048.65,  returns: -723.89,   labor_cost: 31458.86, hours: 1598.45, headcount: 23, event_rev: 10627.00  },
-  { name: "Philadelphia",         code: "PHL",   city: "Philadelphia, PA",   gross_sales: 374770.00,  net_sales: 327527.00,  discounts: -44833.50,  returns: -2409.50,  labor_cost: 62171.59, hours: 3181.56, headcount: 15, event_rev: 19343.00  },
-  { name: "Dallas",               code: "DAL",   city: "Dallas, TX",         gross_sales: 211665.00,  net_sales: 177604.45,  discounts: -33554.05,  returns: -506.50,   labor_cost: 38779.28, hours: 1839.77, headcount: 12, event_rev: 8146.00   },
-  { name: "Wynwood",              code: "MIA",   city: "Miami, FL",          gross_sales: 205150.00,  net_sales: 178403.10,  discounts: -26615.50,  returns: -131.40,   labor_cost: 30160.30, hours: 1447.52, headcount: 10, event_rev: 14426.00  },
+  { name: "Bleecker Street",      code: "BLK",   city: "New York, NY",       gross_sales: 672236.00,  net_sales: 537553.12,  discounts: -133651.95, returns: -1030.93,  labor_cost: 83611.35, hours: 4037.75, headcount: 34, event_rev: 127926.00 },
+  { name: "Atlanta Ponce Market", code: "ATL",   city: "Atlanta, GA",        gross_sales: 417325.00,  net_sales: 365312.27,  discounts: -50797.75,  returns: -1214.98,  labor_cost: 65136.94, hours: 3245.31, headcount: 21, event_rev: 22467.00  },
+  { name: "281 Mott Street",      code: "MOT",   city: "New York, NY",       gross_sales: 461270.00,  net_sales: 405956.87,  discounts: -54537.40,  returns: -775.73,   labor_cost: 48931.78, hours: 2438.09, headcount: 33, event_rev: 112707.00 },
+  { name: "Union Market",         code: "UNION", city: "Washington, DC",     gross_sales: 341055.00,  net_sales: 289810.60,  discounts: -48870.80,  returns: -2373.60,  labor_cost: 48268.96, hours: 2236.92, headcount: 17, event_rev: 12770.00  },
+  { name: "Boston Newbury",       code: "BOS",   city: "Boston, MA",         gross_sales: 326540.00,  net_sales: 282707.62,  discounts: -42787.75,  returns: -1044.63,  labor_cost: 49142.34, hours: 2205.45, headcount: 12, event_rev: 40191.00  },
+  { name: "Georgetown",           code: "GEO",   city: "Washington, DC",     gross_sales: 328435.00,  net_sales: 290357.91,  discounts: -37800.75,  returns: -276.34,   labor_cost: 50283.47, hours: 2056.11, headcount: 10, event_rev: 33325.00  },
+  { name: "Williamsburg",         code: "WBG",   city: "Brooklyn, NY",       gross_sales: 217138.00,  net_sales: 192016.70,  discounts: -24805.25,  returns: -316.05,    labor_cost: 29883.25, hours: 1537.22, headcount: 18, event_rev: 10627.00  },
+  { name: "Philadelphia",         code: "PHL",   city: "Philadelphia, PA",   gross_sales: 333345.00,  net_sales: 287474.20,  discounts: -44135.00,  returns: -1735.80,  labor_cost: 57692.52, hours: 2892.01, headcount: 17, event_rev: 19343.00  },
+  { name: "Dallas",               code: "DAL",   city: "Dallas, TX",         gross_sales: 206430.00,  net_sales: 176097.05,  discounts: -29992.95,  returns: -340.00,   labor_cost: 37768.38, hours: 1789.40, headcount: 12, event_rev: 8146.00   },
+  { name: "Wynwood",              code: "MIA",   city: "Miami, FL",          gross_sales: 186785.00,  net_sales: 167433.10,  discounts: -19195.50,  returns: -156.40,   labor_cost: 30102.24, hours: 1546.56, headcount: 8, event_rev: 14426.00  },
 ];
 
-// Previous period data (May 6 – Aug 4, 2026 shifted from prior run) for week-on-week comparison
+// Previous period data (shifted from prior run) for week-on-week comparison
 const PREV_STORES = [
-  { name: "Bleecker Street",      code: "BLK",   city: "New York, NY",       gross_sales: 728900.00,  net_sales: 587605.31,  discounts: -139081.85, returns: -2212.84,  labor_cost: 47205.84, hours: 2038.90, headcount: 19, event_rev: 127926.00 },
-  { name: "Atlanta Ponce Market", code: "ATL",   city: "Atlanta, GA",        gross_sales: 466535.00,  net_sales: 414711.21,  discounts: -50648.00,  returns: -1175.79,  labor_cost: 18639.06, hours: 959.83,  headcount: 7,  event_rev: 22467.00  },
-  { name: "281 Mott Street",      code: "MOT",   city: "New York, NY",       gross_sales: 429825.00,  net_sales: 361438.62,  discounts: -67689.90,  returns: -696.48,   labor_cost: 24935.55, hours: 1188.41, headcount: 13, event_rev: 112707.00 },
-  { name: "Union Market",         code: "UNION", city: "Washington, DC",     gross_sales: 379855.00,  net_sales: 317665.35,  discounts: -60408.30,  returns: -1781.35,  labor_cost: 16278.26, hours: 701.00,  headcount: 8,  event_rev: 12770.00  },
-  { name: "Boston Newbury",       code: "BOS",   city: "Boston, MA",         gross_sales: 339670.00,  net_sales: 288298.52,  discounts: -50534.75,  returns: -836.73,   labor_cost: 9840.82,  hours: 459.16,  headcount: 4,  event_rev: 40191.00  },
-  { name: "Georgetown",           code: "GEO",   city: "Washington, DC",     gross_sales: 360988.00,  net_sales: 316072.50,  discounts: -44636.75,  returns: -278.75,   labor_cost: 37436.21, hours: 1449.68, headcount: 7,  event_rev: 33325.00  },
-  { name: "Williamsburg",         code: "WBG",   city: "Brooklyn, NY",       gross_sales: 258350.00,  net_sales: 222429.26,  discounts: -35204.40,  returns: -716.34,   labor_cost: 11093.89, hours: 457.13,  headcount: 9,  event_rev: 10627.00  },
-  { name: "Philadelphia",         code: "PHL",   city: "Philadelphia, PA",   gross_sales: 404638.00,  net_sales: 353329.30,  discounts: -48374.20,  returns: -2934.50,  labor_cost: 668.68,   hours: 39.33,   headcount: 1,  event_rev: 19343.00  },
-  { name: "Dallas",               code: "DAL",   city: "Dallas, TX",         gross_sales: 222625.00,  net_sales: 187010.50,  discounts: -35278.00,  returns: -336.50,   labor_cost: 0.00,     hours: 0.00,    headcount: 0,  event_rev: 8146.00   },
-  { name: "Wynwood",              code: "MIA",   city: "Miami, FL",          gross_sales: 223325.00,  net_sales: 192770.60,  discounts: -29423.00,  returns: -1131.40,  labor_cost: 5925.97,  hours: 337.26,  headcount: 3,  event_rev: 14426.00  },
+  { name: "Bleecker Street",      code: "BLK",   city: "New York, NY",       gross_sales: 665554.00,  net_sales: 537362.29,  discounts: -127123.45, returns: -1068.26,  labor_cost: 91496.31, hours: 4388.40, headcount: 35, event_rev: 127926.00 },
+  { name: "Atlanta Ponce Market", code: "ATL",   city: "Atlanta, GA",        gross_sales: 430545.00,  net_sales: 379697.52,  discounts: -49657.50,  returns: -1189.98,  labor_cost: 73834.67, hours: 3663.18, headcount: 21, event_rev: 22467.00  },
+  { name: "281 Mott Street",      code: "MOT",   city: "New York, NY",       gross_sales: 455505.00,  net_sales: 400002.47,  discounts: -54981.80,  returns: -520.73,   labor_cost: 52428.37, hours: 2635.94, headcount: 30, event_rev: 112707.00 },
+  { name: "Union Market",         code: "UNION", city: "Washington, DC",     gross_sales: 347635.00,  net_sales: 295039.10,  discounts: -49917.30,  returns: -2678.60,  labor_cost: 50395.57, hours: 2393.54, headcount: 17, event_rev: 12770.00  },
+  { name: "Boston Newbury",       code: "BOS",   city: "Boston, MA",         gross_sales: 329525.00,  net_sales: 285157.37,  discounts: -43238.00,  returns: -1129.63,  labor_cost: 55165.91, hours: 2482.76, headcount: 12, event_rev: 40191.00  },
+  { name: "Georgetown",           code: "GEO",   city: "Washington, DC",     gross_sales: 339425.00,  net_sales: 297554.56,  discounts: -41498.75,  returns: -371.69,   labor_cost: 56703.57, hours: 2327.39, headcount: 10, event_rev: 33325.00  },
+  { name: "Williamsburg",         code: "WBG",   city: "Brooklyn, NY",       gross_sales: 216620.00,  net_sales: 191708.20,  discounts: -24689.25,  returns: -222.55,    labor_cost: 33401.81, hours: 1705.75, headcount: 20, event_rev: 10627.00  },
+  { name: "Philadelphia",         code: "PHL",   city: "Philadelphia, PA",   gross_sales: 336830.00,  net_sales: 290438.95,  discounts: -44310.25,  returns: -2080.80,  labor_cost: 65228.48, hours: 3277.31, headcount: 17, event_rev: 19343.00  },
+  { name: "Dallas",               code: "DAL",   city: "Dallas, TX",         gross_sales: 205315.00,  net_sales: 175350.55,  discounts: -29624.45,  returns: -340.00,   labor_cost: 42277.61, hours: 2005.77, headcount: 11, event_rev: 8146.00   },
+  { name: "Wynwood",              code: "MIA",   city: "Miami, FL",          gross_sales: 190955.00,  net_sales: 171341.10,  discounts: -19432.50,  returns: -181.40,   labor_cost: 33649.06, hours: 1691.77, headcount: 9, event_rev: 14426.00  },
 ];
 const PREV_ANCILLARY = {
-  "BLK":   { anc_net: 69002.57, anc_pct: 9.47 },
-  "MOT":   { anc_net: 40937.99, anc_pct: 9.52 },
-  "WBG":   { anc_net: 28111.25, anc_pct: 10.88 },
-  "ATL":   { anc_net: 59308.25, anc_pct: 12.71 },
-  "BOS":   { anc_net: 31817.34, anc_pct: 9.37  },
-  "UNION": { anc_net: 40228.20, anc_pct: 10.59 },
-  "GEO":   { anc_net: 40113.56, anc_pct: 11.11 },
-  "PHL":   { anc_net: 36481.60, anc_pct: 9.02  },
-  "DAL":   { anc_net: 22535.99, anc_pct: 10.12 },
-  "MIA":   { anc_net: 16842.05, anc_pct: 7.54  },
+  "BLK":   { anc_net: 59611.42, anc_pct: 8.96,  anc_orders: 0, py_net: 0, pct_chg: null },
+  "MOT":   { anc_net: 39730.37, anc_pct: 8.72,  anc_orders: 0, py_net: 0, pct_chg: null },
+  "WBG":   { anc_net: 19520.03, anc_pct: 9.01,  anc_orders: 0, py_net: 0, pct_chg: null },
+  "ATL":   { anc_net: 48301.93, anc_pct: 11.22, anc_orders: 0, py_net: 0, pct_chg: null },
+  "BOS":   { anc_net: 28890.44, anc_pct: 8.77,  anc_orders: 0, py_net: 0, pct_chg: null },
+  "UNION": { anc_net: 35662.70, anc_pct: 10.26, anc_orders: 0, py_net: 0, pct_chg: null },
+  "GEO":   { anc_net: 34612.37, anc_pct: 10.20, anc_orders: 0, py_net: 0, pct_chg: null },
+  "PHL":   { anc_net: 34239.23, anc_pct: 10.17,  anc_orders: 0, py_net: 0, pct_chg: null },
+  "DAL":   { anc_net: 20656.88, anc_pct: 10.06, anc_orders: 0, py_net: 0, pct_chg: null },
+  "MIA":   { anc_net: 12846.04, anc_pct: 6.73,  anc_orders: 0, py_net: 0, pct_chg: null },
 };
 
 // All stores now use individual labor figures
@@ -349,7 +349,7 @@ function App() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600, color: "#0F172A" }}>Store Scorecards</h1>
-          <p style={{ margin: "3px 0 0", fontSize: 13, color: "#64748B" }}>May 19 – Aug 17, 2026 (Last 90 Days) · Shopify POS + Rippling <span style={{color:"#94A3B8"}}>(all stores May 19 – Aug 17)</span></p>
+          <p style={{ margin: "3px 0 0", fontSize: 13, color: "#64748B" }}>Jul 15 – Oct 13, 2026 (Last 90 Days) · Shopify POS + Rippling <span style={{color:"#94A3B8"}}>(all stores Jul 27 – Oct 4)</span></p>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {["detail", "table"].map(v => (
